@@ -19,6 +19,7 @@ class User(AbstractUser):
     )
     username = models.CharField(
         'Никнейм',
+        unique=True,
         max_length=150,
         validators=[RegexValidator(
             regex=r'^[\w.@+-]+$',
