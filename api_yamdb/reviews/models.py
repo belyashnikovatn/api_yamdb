@@ -108,3 +108,56 @@ class GenreTitle(models.Model):
 
     def __str__(self):
         return f'{self.genre} у {self.title[:SLICELENGTH]}'
+
+
+class AuthorTextPubDateBaseModel(models.Model):
+    """"""
+    author = models.ForeignKey(
+        'Автор',
+        User,
+        on_delete=models.CASCADE,
+    )
+    text = models.TextField('Текст')
+    pub_date = models.DateTimeField(
+        'Дата добавления',
+        auto_now_add=True,
+        db_index=True
+    )
+
+    class Meta:
+        ordering = ('-pub_date',)
+
+    def __str__(self):
+        return self.text[:SLICELENGTH]
+
+
+class Review(AuthorTextPubDateBaseModel):
+    """Модель для отзыва."""
+    title = models.ForeignKey(
+        'Произведение',
+        Title,
+        on_delete=models.CASCADE,
+        related_name='reviews',
+    )
+    score = models.PositiveSmallIntegerField(
+        verbose_name='Оценка'
+    )
+
+    class Meta(AuthorTextPubDateBaseModel.Meta):
+        verbose_name = 'Отзыв'
+        verbose_name_plural = 'отзывы'
+        default_related_name = 'reviews'
+
+
+class Comment(AuthorTextPubDateBaseModel):
+    """Модель для представления комментария к посту."""
+    review = models.ForeignKey(
+        'Комментарии',
+        Review,
+        on_delete=models.CASCADE
+    )
+
+    class Meta(AuthorTextPubDateBaseModel.Meta):
+        verbose_name = 'Комментарий'
+        verbose_name_plural = 'Комментарии'
+        default_related_name = 'comments'
