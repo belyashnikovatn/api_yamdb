@@ -6,7 +6,7 @@ from rest_framework import routers
 API_VERSION_1 = 'v1/'
 
 router_v1 = routers.DefaultRouter()
-# router_v1.register('posts', UsersViewSet)
+# router_v1.register('users', UsersViewSet)
 
 urlpatterns = [
     # path(f'{API_VERSION_1}auth/signup/', SignUpView.as_view(), name='signup'),
