@@ -5,7 +5,8 @@ from django.utils.translation import gettext_lazy as _
 
 
 class User(AbstractUser):
-    """Класс модели данных для пользователей, кастомизация стандратного класса."""
+    """Класс модели данных для пользователей,
+    кастомизация стандратного класса."""
 
     class Role(models.TextChoices):
         USER = 'user', _('User')
