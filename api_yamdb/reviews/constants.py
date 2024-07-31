@@ -1,0 +1,3 @@
+# CONSTANTS for review app
+SLICELENGTH = 50
+MINYEAR = 1895

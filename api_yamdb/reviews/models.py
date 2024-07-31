@@ -1,5 +1,5 @@
 from datetime import datetime
-from api_yamdb.settings import SLICELENGTH, MINYEAR
+from reviews.constants import SLICELENGTH, MINYEAR
 
 from django.contrib.auth import get_user_model
 from django.core.validators import (
@@ -13,7 +13,7 @@ from django.db import models
 User = get_user_model()
 
 
-class Type(models.Model):
+class NameSlugModel(models.Model):
     """Абстрактный класс для категории и жанра."""
     name = models.CharField('Название', max_length=256)
     slug = models.SlugField(
@@ -35,7 +35,7 @@ class Type(models.Model):
         return self.name[:SLICELENGTH]
 
 
-class Genre(Type):
+class Genre(NameSlugModel):
     """Класс модели данных для жанров."""
 
     class Meta:
@@ -43,7 +43,7 @@ class Genre(Type):
         verbose_name_plural = 'Жанры'
 
 
-class Category(Type):
+class Category(NameSlugModel):
     """Класс модели данных для категорий."""
 
     class Meta:

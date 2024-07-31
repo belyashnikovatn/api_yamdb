@@ -107,7 +107,3 @@ STATICFILES_DIRS = ((BASE_DIR / 'static/'),)
 
 # For customizing User model
 AUTH_USER_MODEL = 'users.User'
-
-# CONSTANTS
-SLICELENGTH = 50
-MINYEAR = 1895
