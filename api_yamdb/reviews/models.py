@@ -1,4 +1,5 @@
 from datetime import datetime
+from api_yamdb.settings import SLICELENGTH, MINYEAR
 
 from django.contrib.auth import get_user_model
 from django.core.validators import (
@@ -12,7 +13,7 @@ from django.db import models
 User = get_user_model()
 
 
-class Detail(models.Model):
+class Type(models.Model):
     """Абстрактный класс для категории и жанра."""
     name = models.CharField('Название', max_length=256)
     slug = models.SlugField(
@@ -27,26 +28,27 @@ class Detail(models.Model):
         ]
     )
 
+    class Meta:
+        ordering = ('name',)
+
     def __str__(self):
-        return self.name
+        return self.name[:SLICELENGTH]
 
 
-class Genre(Detail):
+class Genre(Type):
     """Класс модели данных для жанров."""
 
     class Meta:
         verbose_name = 'жанр'
         verbose_name_plural = 'Жанры'
-        ordering = ('name',)
 
 
-class Category(Detail):
+class Category(Type):
     """Класс модели данных для категорий."""
 
     class Meta:
         verbose_name = 'категория'
         verbose_name_plural = 'Категории'
-        ordering = ('name',)
 
 
 class Title(models.Model):
@@ -56,7 +58,7 @@ class Title(models.Model):
         'Год выпуска',
         validators=[
             MinValueValidator(
-                1895,
+                MINYEAR,
                 message='This is not possible!'),
             MaxValueValidator(
                 int(datetime.now().year),
@@ -85,7 +87,7 @@ class Title(models.Model):
         ordering = ('name', '-year')
 
     def __str__(self):
-        return f'{self.name}, {self.year}'
+        return f'{self.name[:SLICELENGTH]}, {self.year}'
 
 
 class GenreTitle(models.Model):
@@ -105,4 +107,4 @@ class GenreTitle(models.Model):
         ]
 
     def __str__(self):
-        return f'{self.genre} у {self.title}'
+        return f'{self.genre} у {self.title[:SLICELENGTH]}'
