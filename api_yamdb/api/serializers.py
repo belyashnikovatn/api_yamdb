@@ -4,6 +4,7 @@ from rest_framework import serializers
 
 
 class GenreSerailizer(serializers.ModelSerializer):
+    """Класс-сериализатор для жанра."""
 
     class Meta:
         model = Genre
@@ -11,6 +12,7 @@ class GenreSerailizer(serializers.ModelSerializer):
 
 
 class CategorySerailizer(serializers.ModelSerializer):
+    """Класс-сериализатор для категории."""
 
     class Meta:
         model = Category
@@ -18,8 +20,10 @@ class CategorySerailizer(serializers.ModelSerializer):
 
 
 class TitleReadOnlySerailizer(serializers.ModelSerializer):
+    """Класс-сериализатор для произведений: метод get."""
     genre = GenreSerailizer(many=True, read_only=True)
     category = CategorySerailizer(read_only=True)
+    # тут пока заглушка
     rating = 0
 
     class Meta:
@@ -28,7 +32,8 @@ class TitleReadOnlySerailizer(serializers.ModelSerializer):
                   'description', 'genre', 'category')
 
 
-class TitleSerailizer(TitleReadOnlySerailizer):
+class TitleSerailizer(serializers.ModelSerializer):
+    """Класс-сериализатор для произведений: методы кроме get."""
     genre = serializers.SlugRelatedField(
         slug_field='slug',
         queryset=Genre.objects.all(),
@@ -38,3 +43,7 @@ class TitleSerailizer(TitleReadOnlySerailizer):
         slug_field='slug',
         queryset=Category.objects.all()
     )
+
+    class Meta:
+        model = Title
+        fields = ('id', 'name', 'year', 'description', 'genre', 'category')

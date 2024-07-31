@@ -4,7 +4,8 @@ from reviews.models import Title, Genre, Category
 from api.serializers import (
     GenreSerailizer,
     CategorySerailizer,
-    TitleSerailizer
+    TitleSerailizer,
+    TitleReadOnlySerailizer
 )
 from django_filters.rest_framework import DjangoFilterBackend
 
@@ -36,3 +37,8 @@ class TitleViewSet(viewsets.ModelViewSet):
     queryset = Title.objects.all()
     filter_backends = (DjangoFilterBackend,)
     filterset_fields = ('name', 'year', 'genre__slug', 'category__slug')
+
+    def get_serializer_class(self):
+        if self.request.method == 'GET':
+            return TitleReadOnlySerailizer
+        return TitleSerailizer
