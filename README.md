@@ -20,6 +20,7 @@ Python + Django REST Framework + аутентификация (позже рас
 - $ cd api_yamdb
 - $ python manage.py migrate
 - $ python manage.py runserver
+- $ python manage.py loaddata reviews_db.json // для загрузки данных
 
 
 ## Выполненные задачи

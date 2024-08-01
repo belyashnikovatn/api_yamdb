@@ -1,0 +1,82 @@
+[
+{
+  "model": "reviews.category",
+  "pk": 6,
+  "fields": {}
+},
+{
+  "model": "reviews.category",
+  "pk": 7,
+  "fields": {}
+},
+{
+  "model": "reviews.category",
+  "pk": 5,
+  "fields": {}
+},
+{
+  "model": "reviews.genre",
+  "pk": 3,
+  "fields": {}
+},
+{
+  "model": "reviews.genre",
+  "pk": 9,
+  "fields": {}
+},
+{
+  "model": "reviews.genre",
+  "pk": 1,
+  "fields": {}
+},
+{
+  "model": "reviews.genre",
+  "pk": 2,
+  "fields": {}
+},
+{
+  "model": "reviews.genre",
+  "pk": 10,
+  "fields": {}
+},
+{
+  "model": "reviews.genre",
+  "pk": 8,
+  "fields": {}
+},
+{
+  "model": "reviews.genre",
+  "pk": 4,
+  "fields": {}
+},
+{
+  "model": "reviews.title",
+  "pk": 1,
+  "fields": {
+    "name": "Побег из Шоушенка",
+    "year": 1994,
+    "description": "",
+    "category": 5
+  }
+},
+{
+  "model": "reviews.title",
+  "pk": 2,
+  "fields": {
+    "name": "Крестный отец",
+    "year": 1972,
+    "description": "",
+    "category": 5
+  }
+},
+{
+  "model": "reviews.title",
+  "pk": 3,
+  "fields": {
+    "name": "12 разгневанных мужчин",
+    "year": 1957,
+    "description": "",
+    "category": 5
+  }
+}
+]
