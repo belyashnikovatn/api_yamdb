@@ -111,7 +111,7 @@ class GenreTitle(models.Model):
 
 
 class AuthorTextPubDateBaseModel(models.Model):
-    """"""
+    """Вспомогательный класс, связывающий отзывы и комментарии к ним."""
     author = models.ForeignKey(
         'Автор',
         User,
@@ -140,7 +140,17 @@ class Review(AuthorTextPubDateBaseModel):
         related_name='reviews',
     )
     score = models.PositiveSmallIntegerField(
-        verbose_name='Оценка'
+        verbose_name='Оценка',
+        validators=[
+            MinValueValidator(
+                1,
+                message='Введенная оценка ниже допустимой'
+            ),
+            MaxValueValidator(
+                10,
+                message='Введенная оценка выше допустимой'
+            ),
+        ]
     )
 
     class Meta(AuthorTextPubDateBaseModel.Meta):
