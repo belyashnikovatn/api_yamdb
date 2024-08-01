@@ -5,8 +5,16 @@ from django.utils.translation import gettext_lazy as _
 
 
 class User(AbstractUser):
-    """Класс модели данных для пользователей,
-    кастомизация стандратного класса."""
+    """Расширенная модель пользователя.
+    Переопрделяет и добавляет поля:
+    - роль (Enum: "user" "moderator" "admin"),
+    - юзернейм (<= 150 characters, вкл. буквы, цифры и символы: @, ., +, -),
+    - электронная почта (<= 254 characters),
+    - имя (<= 150 characters),
+    - фамилия (<= 150 characters),
+    - о себе,
+    - код подтверждения (для формирования токена).
+    """
 
     class Role(models.TextChoices):
         USER = 'user', _('User')
@@ -14,7 +22,8 @@ class User(AbstractUser):
         ADMIN = 'admin', _('Admin')
 
     role = models.CharField(
-        max_length=9,
+        'Роль',
+        max_length=100,
         choices=Role.choices,
         default=Role.USER,
     )
@@ -27,10 +36,15 @@ class User(AbstractUser):
             message='Unacceptable symbol'
         )]
     )
-    email = models.EmailField('Почта', max_length=254)
+    email = models.EmailField('Почта', unique=True, max_length=254)
     first_name = models.CharField('Имя', max_length=150, blank=True)
     last_name = models.CharField('Фамилия', max_length=150, blank=True)
     bio = models.TextField('О себе', blank=True)
+    confirmation_code = models.CharField(
+        'Код подтверждения',
+        max_length=100,
+        default='Default token'
+    )
 
     class Meta:
         verbose_name = 'пользователь'

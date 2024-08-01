@@ -12,7 +12,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 
 class NameSlugModelViewSet(mixins.CreateModelMixin,
                            mixins.ListModelMixin,
-                           mixins.Destroy,
+                           mixins.DestroyModelMixin,
                            viewsets.GenericViewSet):
     """Абстрактный класс для вьюсетов категория/жанр."""
     filter_backends = (filters.SearchFilter,)
