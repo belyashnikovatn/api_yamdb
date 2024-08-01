@@ -20,19 +20,25 @@ class NameSlugModelViewSet(mixins.CreateModelMixin,
 
 
 class GenreViewSet(NameSlugModelViewSet):
-    """Вьюсет для жанра."""
+    """Вьюсет для жанра.
+    Доступные действия: просмотр списка, добавление, удаление,
+    поиск по наименованию (регистр учитывается)."""
     serializer_class = GenreSerailizer
     queryset = Genre.objects.all()
 
 
 class CategoryViewSet(NameSlugModelViewSet):
-    """Вьюсет для категории."""
+    """Вьюсет для категории.
+    Доступные действия: просмотр списка, добавление, удаление,
+    поиск по наименованию (регистр учитывается)."""
     serializer_class = CategorySerailizer
     queryset = Category.objects.all()
 
 
 class TitleViewSet(viewsets.ModelViewSet):
-    """Вьюсет для произведений."""
+    """Вьюсет для произведений.
+    Доступные действия: весь набор.
+    Поиск по полям: название, год, slug жанры(ы), slug категория."""
     serializer_class = TitleSerailizer
     queryset = Title.objects.all()
     filter_backends = (DjangoFilterBackend,)
