@@ -66,7 +66,7 @@ class Title(models.Model):
             )
         ]
     )
-    description = models.TextField('Описание')
+    description = models.TextField('Описание', blank=True, null=True)
     genre = models.ManyToManyField(
         Genre,
         through='GenreTitle',
