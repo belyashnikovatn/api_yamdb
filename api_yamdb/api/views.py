@@ -2,10 +2,10 @@ from rest_framework import viewsets
 from rest_framework import filters, mixins, viewsets
 from reviews.models import Title, Genre, Category
 from api.serializers import (
-    GenreSerailizer,
-    CategorySerailizer,
-    TitleSerailizer,
-    TitleReadOnlySerailizer
+    GenreSerializer,
+    CategorySerializer,
+    TitleSerializer,
+    TitleReadOnlySerializer
 )
 from django_filters.rest_framework import DjangoFilterBackend
 
@@ -23,7 +23,7 @@ class GenreViewSet(NameSlugModelViewSet):
     """Вьюсет для жанра.
     Доступные действия: просмотр списка, добавление, удаление,
     поиск по наименованию (регистр учитывается)."""
-    serializer_class = GenreSerailizer
+    serializer_class = GenreSerializer
     queryset = Genre.objects.all()
 
 
@@ -31,7 +31,7 @@ class CategoryViewSet(NameSlugModelViewSet):
     """Вьюсет для категории.
     Доступные действия: просмотр списка, добавление, удаление,
     поиск по наименованию (регистр учитывается)."""
-    serializer_class = CategorySerailizer
+    serializer_class = CategorySerializer
     queryset = Category.objects.all()
 
 
@@ -39,12 +39,12 @@ class TitleViewSet(viewsets.ModelViewSet):
     """Вьюсет для произведений.
     Доступные действия: весь набор.
     Поиск по полям: название, год, slug жанры(ы), slug категория."""
-    serializer_class = TitleSerailizer
+    serializer_class = TitleSerializer
     queryset = Title.objects.all()
     filter_backends = (DjangoFilterBackend,)
     filterset_fields = ('name', 'year', 'genre__slug', 'category__slug')
 
     def get_serializer_class(self):
         if self.request.method == 'GET':
-            return TitleReadOnlySerailizer
-        return TitleSerailizer
+            return TitleReadOnlySerializer
+        return TitleSerializer
