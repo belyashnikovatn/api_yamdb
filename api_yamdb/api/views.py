@@ -6,6 +6,8 @@ from rest_framework import status
 from rest_framework_simplejwt.tokens import AccessToken
 from rest_framework.filters import SearchFilter
 from rest_framework.decorators import action
+from rest_framework.pagination import PageNumberPagination
+
 from reviews.models import Title, Genre, Category
 from users.models import User
 from api.serializers import (
@@ -22,7 +24,6 @@ import random
 import string
 from django.core.mail import send_mail
 from django.conf import settings
-from api.pagination import CustomPagination
 
 
 class SignUpView(generics.CreateAPIView):
@@ -131,7 +132,7 @@ class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
     # permission_classes -- пока что оставлю заглушку.
-    pagination_class = CustomPagination
+    pagination_class = PageNumberPagination
     filter_backends = (SearchFilter,)
     search_fields = ('username',)
 
