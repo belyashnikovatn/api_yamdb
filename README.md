@@ -21,7 +21,7 @@ Python + Django REST Framework + аутентификация (позже рас
 - $ python manage.py migrate
 - $ python manage.py loaddata reviews_db.json // для загрузки данных
 - $ python manage.py runserver
-- $ python manage.py import_cvs_data // для загрузки данных
+- $ python manage.py import_csv_data // для загрузки данных
 
 
 ## Выполненные задачи
