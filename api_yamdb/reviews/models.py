@@ -66,7 +66,7 @@ class Title(models.Model):
             )
         ]
     )
-    description = models.TextField('Описание')
+    description = models.TextField('Описание', blank=True, null=True)
     genre = models.ManyToManyField(
         Genre,
         through='GenreTitle',
@@ -108,3 +108,73 @@ class GenreTitle(models.Model):
 
     def __str__(self):
         return f'{self.genre} у {self.title[:SLICELENGTH]}'
+
+
+class AuthorTextPubDateBaseModel(models.Model):
+    """Вспомогательный класс, связывающий отзывы и комментарии к ним."""
+    author = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='texts',
+        verbose_name='Автор'
+    )
+    text = models.TextField(verbose_name='Текст')
+    pub_date = models.DateTimeField(
+        verbose_name='Дата добавления',
+        auto_now_add=True,
+        db_index=True
+    )
+
+    class Meta:
+        abstract = True
+        ordering = ('-pub_date',)
+
+    def __str__(self):
+        return self.text[:SLICELENGTH]
+
+
+class Review(AuthorTextPubDateBaseModel):
+    """Модель для отзыва."""
+    title = models.ForeignKey(
+        Title,
+        on_delete=models.CASCADE,
+        verbose_name='Произведение'
+    )
+    score = models.PositiveSmallIntegerField(
+        verbose_name='Оценка',
+        validators=[
+            MinValueValidator(
+                1,
+                message='Введенная оценка ниже допустимой'
+            ),
+            MaxValueValidator(
+                10,
+                message='Введенная оценка выше допустимой'
+            ),
+        ]
+    )
+
+    class Meta(AuthorTextPubDateBaseModel.Meta):
+        verbose_name = 'Отзыв'
+        verbose_name_plural = 'Отзывы'
+        default_related_name = 'reviews'
+        constraints = [
+            models.UniqueConstraint(
+                fields=['title', 'author'],
+                name='unique_review'
+            )
+        ]
+
+
+class Comment(AuthorTextPubDateBaseModel):
+    """Модель для представления комментария к посту."""
+    review = models.ForeignKey(
+        Review,
+        on_delete=models.CASCADE,
+        related_name='comments'
+    )
+
+    class Meta(AuthorTextPubDateBaseModel.Meta):
+        verbose_name = 'Комментарий'
+        verbose_name_plural = 'Комментарии'
+        default_related_name = 'comments'
