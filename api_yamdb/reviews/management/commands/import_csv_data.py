@@ -4,7 +4,7 @@ import os
 from django.conf import settings
 from django.core.management.base import BaseCommand
 
-from reviews.models import Genre, Category, Title, GenreTitle
+from reviews.models import Genre, Category, Title, GenreTitle, NameSlugModel
 from users.models import User
 
 
@@ -14,11 +14,16 @@ class Command(BaseCommand):
     help = 'Import csv-files into DB through models.'
 
     def handle(self, *args, **options):
+        # Clean tables before.
+        NameSlugModel.objects.all().delete()
+        Title.objects.all().delete()
         files_models = {
             'category.csv': Category,
             'genre.csv': Genre,
-            'titles.csv': Title
+            # 'genre_title.csv': GenreTitle,
+            # 'titles.csv': Title
         }
+
         for csv_file, model in files_models.items():
             with open(os.path.join(
                     settings.BASE_DIR,
