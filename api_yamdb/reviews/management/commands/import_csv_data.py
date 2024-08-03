@@ -4,6 +4,7 @@ import os
 from django.conf import settings
 from django.core.management.base import BaseCommand
 
+from api_yamdb.settings import CSV_FILES_DIRS
 from reviews.models import Genre, Category, Title, GenreTitle, NameSlugModel
 from users.models import User
 
@@ -25,11 +26,8 @@ class Command(BaseCommand):
         }
 
         for csv_file, model in files_models.items():
-            with open(os.path.join(
-                    settings.BASE_DIR,
-                    'static/data/',
-                    csv_file),
-                    encoding='utf-8') as csvfile:
+            with open(os.path.join(CSV_FILES_DIRS, csv_file),
+                      encoding='utf-8') as csvfile:
                 reader = csv.DictReader(csvfile)
                 for row in reader:
                     model.objects.create(**row)

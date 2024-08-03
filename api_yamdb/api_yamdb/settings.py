@@ -108,6 +108,7 @@ USE_TZ = True
 STATIC_URL = '/static/'
 
 STATICFILES_DIRS = ((BASE_DIR / 'static/'),)
+CSV_FILES_DIRS = BASE_DIR / 'static/data/'
 
 # For customizing User model
 AUTH_USER_MODEL = 'users.User'
