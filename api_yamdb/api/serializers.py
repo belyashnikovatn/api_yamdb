@@ -12,7 +12,32 @@ class SignUpSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['email', 'username']
-    pass
+
+    def validate_username(self, value):
+        """
+        Проверяет, что username не равен 'me'.
+
+        - param value: Значение поля username.
+        """
+        if value.lower() == 'me':
+            raise serializers.ValidationError("Юзернейм 'me' недопустим.")
+        return value
+
+    def validate(self, data):
+        """
+        Проверяет, что email и username уникальны.
+
+        - param data: Данные сериализатора.
+        """
+        email = data.get('email')
+        username = data.get('username')
+
+        if User.objects.filter(email=email).exists():
+            raise serializers.ValidationError("Такой email уже существует.")
+        if User.objects.filter(username=username).exists():
+            raise serializers.ValidationError("Такой username уже существует.")
+
+        return data
 
 
 class TokenSerializer(serializers.Serializer):
@@ -26,7 +51,28 @@ class TokenSerializer(serializers.Serializer):
     """
     username = serializers.CharField(max_length=150)
     confirmation_code = serializers.CharField(max_length=100)
-    pass
+
+    def validate(self, data):
+        """
+        Проверяет наличие пользователя с
+        заданным username и confirmation_code.
+
+        - param data: Входные данные (username и confirmation_code).
+        """
+        username = data.get('username')
+        confirmation_code = data.get('confirmation_code')
+
+        try:
+            user = User.objects.get(username=username,
+                                    confirmation_code=confirmation_code)
+        except User.DoesNotExist:
+            raise serializers.ValidationError('Неверное имя пользователя'
+                                              ' или код подтверждения')
+
+        # добавляем найденного пользователя в словарь data под ключом 'user'
+        data['user'] = user
+
+        return data
 
 
 class UserSerializer(serializers.ModelSerializer):
