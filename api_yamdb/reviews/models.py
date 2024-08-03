@@ -113,18 +113,20 @@ class GenreTitle(models.Model):
 class AuthorTextPubDateBaseModel(models.Model):
     """Вспомогательный класс, связывающий отзывы и комментарии к ним."""
     author = models.ForeignKey(
-        'Автор',
         User,
         on_delete=models.CASCADE,
+        related_name='Author',
+        verbose_name='Автор'
     )
-    text = models.TextField('Текст')
+    text = models.TextField(verbose_name='Текст')
     pub_date = models.DateTimeField(
-        'Дата добавления',
+        verbose_name='Дата добавления',
         auto_now_add=True,
         db_index=True
     )
 
     class Meta:
+        abstract = True
         ordering = ('-pub_date',)
 
     def __str__(self):
@@ -134,10 +136,9 @@ class AuthorTextPubDateBaseModel(models.Model):
 class Review(AuthorTextPubDateBaseModel):
     """Модель для отзыва."""
     title = models.ForeignKey(
-        'Произведение',
         Title,
         on_delete=models.CASCADE,
-        related_name='reviews',
+        verbose_name='Произведение'
     )
     score = models.PositiveSmallIntegerField(
         verbose_name='Оценка',
@@ -155,16 +156,22 @@ class Review(AuthorTextPubDateBaseModel):
 
     class Meta(AuthorTextPubDateBaseModel.Meta):
         verbose_name = 'Отзыв'
-        verbose_name_plural = 'отзывы'
+        verbose_name_plural = 'Отзывы'
         default_related_name = 'reviews'
+        constraints = [
+            models.UniqueConstraint(
+                fields=['title', 'author'],
+                name='unique_review'
+            )
+        ]
 
 
 class Comment(AuthorTextPubDateBaseModel):
     """Модель для представления комментария к посту."""
     review = models.ForeignKey(
-        'Комментарии',
         Review,
-        on_delete=models.CASCADE
+        on_delete=models.CASCADE,
+        related_name='comments'
     )
 
     class Meta(AuthorTextPubDateBaseModel.Meta):

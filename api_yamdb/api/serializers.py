@@ -84,8 +84,8 @@ class ReviewSerializer(serializers.ModelSerializer):
 
 
 class CommentSerializer(serializers.ModelSerializer):
-    review = serializers.SlugRelatedField(
-        slug_field='text',
+    review = serializers.PrimaryKeyRelatedField(
+        queryset=Review.objects.all(),
         read_only=True
     )
     author = serializers.SlugRelatedField(
