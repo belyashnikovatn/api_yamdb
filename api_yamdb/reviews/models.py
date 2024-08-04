@@ -117,7 +117,7 @@ class AuthorTextPubDateBaseModel(models.Model):
         on_delete=models.CASCADE,
         related_name='texts',
         verbose_name='Автор'
-    )
+    ) 
     text = models.TextField(verbose_name='Текст')
     pub_date = models.DateTimeField(
         verbose_name='Дата добавления',
