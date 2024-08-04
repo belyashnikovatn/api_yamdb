@@ -10,11 +10,18 @@ from rest_framework.pagination import PageNumberPagination
 from rest_framework import permissions
 from rest_framework.exceptions import ValidationError
 from rest_framework import serializers
+
 from rest_framework.viewsets import ModelViewSet
 from django.shortcuts import get_object_or_404
 from django.contrib.auth.tokens import default_token_generator as dtg
 
 from reviews.models import Title, Genre, Category, Review
+
+from django.shortcuts import get_object_or_404
+from django.contrib.auth.tokens import default_token_generator as dtg
+
+from reviews.models import Title, Genre, Category
+
 from users.models import User
 from api.serializers import (
     SignUpSerializer,
@@ -113,7 +120,7 @@ class TokenView(generics.CreateAPIView):
 
         # Создаем JWT-токен для пользователя
         access_token = AccessToken.for_user(user)
-
+        
         return Response({'token': str(access_token)}, status=status.HTTP_200_OK)
 
 
@@ -180,7 +187,8 @@ class GenreViewSet(NameSlugModelViewSet):
     поиск по наименованию (регистр учитывается)."""
     serializer_class = GenreSerializer
     queryset = Genre.objects.all()
-    permission_classes = (IsAdminOrReadOnly,)
+    # permission_classes = (IsAdminOrReadOnly,)
+
 
 
 class CategoryViewSet(NameSlugModelViewSet):
@@ -189,7 +197,7 @@ class CategoryViewSet(NameSlugModelViewSet):
     поиск по наименованию (регистр учитывается)."""
     serializer_class = CategorySerializer
     queryset = Category.objects.all()
-    permission_classes = (IsAdminOrReadOnly,)
+    # permission_classes = (IsAdminOrReadOnly,)
 
 
 class TitleViewSet(viewsets.ModelViewSet):
@@ -200,7 +208,7 @@ class TitleViewSet(viewsets.ModelViewSet):
     queryset = Title.objects.all()
     filter_backends = (DjangoFilterBackend,)
     filterset_fields = ('name', 'year', 'genre__slug', 'category__slug')
-    permission_classes = (IsAdminOrReadOnly,)
+    # permission_classes = (IsAdminOrReadOnly,)
 
     def get_serializer_class(self):
         if self.request.method == 'GET':

@@ -9,7 +9,7 @@ from api.views import (CategoryViewSet,
                        UserViewSet,
                        ReviewViewSet,
                        CommentViewSet
-                       )
+)
 
 API_VERSION_1 = 'v1/'
 
