@@ -9,16 +9,17 @@ from rest_framework.decorators import action
 from rest_framework.pagination import PageNumberPagination
 from rest_framework import permissions
 
+
 from reviews.models import Title, Genre, Category
 from users.models import User
 from api.serializers import (
     SignUpSerializer,
     TokenSerializer,
     UserSerializer,
-    GenreSerailizer,
-    CategorySerailizer,
-    TitleSerailizer,
-    TitleReadOnlySerailizer
+    GenreSerializer,
+    CategorySerializer,
+    TitleSerializer,
+    TitleReadOnlySerializer
 )
 from api.permissions import (IsAdminOrReadOnly,
                              IsAdminOrSuperuser,)
@@ -45,6 +46,7 @@ class SignUpView(generics.CreateAPIView):
     """
     serializer_class = SignUpSerializer
     permission_classes = (permissions.AllowAny,)
+
 
     def perform_create(self, serializer):
         """
@@ -95,6 +97,9 @@ class TokenView(generics.CreateAPIView):
     def create(self, request, *args, **kwargs):
         """
         Создает JWT-токен на основе username и confirmation_code.
+
+        :param request: Входной запрос.
+        :return: Ответ с JWT токеном или ошибкой валидации.
         """
         # Создаем экземпляр сериализатора с данными из POST-запроса:
         serializer = self.get_serializer(data=request.data)
@@ -107,6 +112,21 @@ class TokenView(generics.CreateAPIView):
         user = serializer.validated_data['user']
 
         # Создание объекта AccessToken для пользователя:
+        # Извлекаем успешно провалидированные
+        # значения из validated_data в сериализаторе TokenSerializer:
+        username = serializer.validated_data['username']
+        confirmation_code = serializer.validated_data['confirmation_code']
+
+        # Логика проверки и создания токена
+        try:
+            # В момент регестрации (SignUpView) эти поля пропишутся в Users
+            user = User.objects.get(username=username,
+                                    confirmation_code=confirmation_code)
+        except User.DoesNotExist:
+            return Response({'detail': 'Неверное имя или код подтверждения'},
+                            status=status.HTTP_400_BAD_REQUEST)
+
+        # Создание объекта AccessToken для пользователя
         access_token = AccessToken.for_user(user)
 
         return Response({'access': str(access_token),
@@ -137,6 +157,7 @@ class UserViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=['get', 'patch'], url_path='me',
             permission_classes=(permissions.IsAuthenticated,))
+
     def me(self, request):
         """
         Обрабатывает GET и PATCH запросы для
@@ -170,22 +191,28 @@ class NameSlugModelViewSet(mixins.CreateModelMixin,
 
 
 class GenreViewSet(NameSlugModelViewSet):
-    """Вьюсет для жанра."""
-    serializer_class = GenreSerailizer
+    """Вьюсет для жанра.
+    Доступные действия: просмотр списка, добавление, удаление,
+    поиск по наименованию (регистр учитывается)."""
+    serializer_class = GenreSerializer
     queryset = Genre.objects.all()
     permission_classes = (IsAdminOrReadOnly,)
 
 
 class CategoryViewSet(NameSlugModelViewSet):
-    """Вьюсет для категории."""
-    serializer_class = CategorySerailizer
+    """Вьюсет для категории.
+    Доступные действия: просмотр списка, добавление, удаление,
+    поиск по наименованию (регистр учитывается)."""
+    serializer_class = CategorySerializer
     queryset = Category.objects.all()
     permission_classes = (IsAdminOrReadOnly,)
 
 
 class TitleViewSet(viewsets.ModelViewSet):
-    """Вьюсет для произведений."""
-    serializer_class = TitleSerailizer
+    """Вьюсет для произведений.
+    Доступные действия: весь набор.
+    Поиск по полям: название, год, slug жанры(ы), slug категория."""
+    serializer_class = TitleSerializer
     queryset = Title.objects.all()
     filter_backends = (DjangoFilterBackend,)
     filterset_fields = ('name', 'year', 'genre__slug', 'category__slug')
@@ -193,5 +220,5 @@ class TitleViewSet(viewsets.ModelViewSet):
 
     def get_serializer_class(self):
         if self.request.method == 'GET':
-            return TitleReadOnlySerailizer
-        return TitleSerailizer
+            return TitleReadOnlySerializer
+        return TitleSerializer
