@@ -1,8 +1,12 @@
 from django.urls import include, path
 from rest_framework import routers
 
-from api.views import CategoryViewSet, GenreViewSet, TitleViewSet
-from .views import SignUpView, TokenView, UserViewSet
+from api.views import (CategoryViewSet,
+                       GenreViewSet,
+                       TitleViewSet,
+                       SignUpView,
+                       TokenView,
+                       UserViewSet)
 
 API_VERSION_1 = 'v1/'
 

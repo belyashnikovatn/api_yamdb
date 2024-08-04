@@ -19,16 +19,6 @@ class IsAdminOrReadOnly(permissions.BasePermission):
                 and request.user.is_authenticated
                 and request.user.is_staff)
 
-    def has_object_permission(self, request, view, obj):
-        """
-        Проверяет права доступа на уровне конкретного объекта.
-        """
-        if request.method in permissions.SAFE_METHODS:
-            return True
-        return (request.user
-                and request.user.is_authenticated
-                and request.user.is_staff)
-
 
 class IsAdminOrSuperuser(permissions.BasePermission):
     """
@@ -43,9 +33,6 @@ class IsAdminOrSuperuser(permissions.BasePermission):
             request.user.is_authenticated
             and (request.user.role == 'admin' or request.user.is_superuser)
         )
-
-    def has_object_permission(self, request, view, obj):
-        return True
 
 
 class IsAuthorOrModeratorOrAdmin(permissions.BasePermission):
@@ -72,4 +59,3 @@ class IsAuthorOrModeratorOrAdmin(permissions.BasePermission):
             or request.user.is_moderator
             or request.user.is_admin
         )
-

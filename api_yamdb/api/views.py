@@ -20,8 +20,8 @@ from api.serializers import (
     TitleSerailizer,
     TitleReadOnlySerailizer
 )
-from .permissions import (IsAdminOrReadOnly,
-                          IsAdminOrSuperuser,)
+from api.permissions import (IsAdminOrReadOnly,
+                             IsAdminOrSuperuser,)
 from django_filters.rest_framework import DjangoFilterBackend
 import random
 import string
@@ -65,6 +65,12 @@ class SignUpView(generics.CreateAPIView):
             [user.email],
             fail_silently=False,
         )
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def create(self, request, *args, **kwargs):
+        response = super().create(request, *args, **kwargs)
+        response.status_code = status.HTTP_200_OK
+        return response
 
 
 class TokenView(generics.CreateAPIView):
