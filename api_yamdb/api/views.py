@@ -8,6 +8,10 @@ from rest_framework.filters import SearchFilter
 from rest_framework.decorators import action
 from rest_framework.pagination import PageNumberPagination
 from rest_framework import permissions
+from rest_framework.exceptions import ValidationError
+from rest_framework import serializers
+from django.shortcuts import get_object_or_404
+from django.contrib.auth.tokens import default_token_generator as dtg
 
 from reviews.models import Title, Genre, Category
 from users.models import User
@@ -96,21 +100,18 @@ class TokenView(generics.CreateAPIView):
         """
         Создает JWT-токен на основе username и confirmation_code.
         """
-        # Создаем экземпляр сериализатора с данными из POST-запроса:
         serializer = self.get_serializer(data=request.data)
-        # Проверяем, что данные POST-запроса валидны.
-        # Если нет, выбрасывается ValidationError:
         serializer.is_valid(raise_exception=True)
+        username = serializer.validated_data['username']
+        user = get_object_or_404(User, username=username)
+        # Проверяем код подтверждения
+        if not dtg.check_token(user, request.data.get('confirmation_code')):
+            raise ValidationError('Неверный код подтверждения')
 
-        # После вадиации в сериализаторе,
-        # извлекаем пользователя из validated_data:
-        user = serializer.validated_data['user']
-
-        # Создание объекта AccessToken для пользователя:
+        # Создаем JWT-токен для пользователя
         access_token = AccessToken.for_user(user)
-
-        return Response({'access': str(access_token),
-                         }, status=status.HTTP_200_OK)
+        
+        return Response({'token': str(access_token)}, status=status.HTTP_200_OK)
 
 
 class UserViewSet(viewsets.ModelViewSet):

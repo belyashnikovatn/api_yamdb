@@ -6,7 +6,8 @@ from api.views import (CategoryViewSet,
                        TitleViewSet,
                        SignUpView,
                        TokenView,
-                       UserViewSet)
+                       UserViewSet,
+                       )
 
 API_VERSION_1 = 'v1/'
 
