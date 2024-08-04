@@ -115,7 +115,7 @@ class AuthorTextPubDateBaseModel(models.Model):
     author = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
-        related_name='texts',
+        # related_name='texts',
         verbose_name='Автор'
     )
     text = models.TextField(verbose_name='Текст')

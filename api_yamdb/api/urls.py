@@ -2,12 +2,12 @@ from django.urls import include, path
 from rest_framework import routers
 
 from api.views import CategoryViewSet, GenreViewSet, TitleViewSet
-from .views import SignUpView, TokenView, UsersViewSet
+from .views import SignUpView, TokenView, UserViewSet
 
 API_VERSION_1 = 'v1/'
 
 router_v1 = routers.DefaultRouter()
-router_v1.register('users', UsersViewSet)
+router_v1.register('users', UserViewSet)
 router_v1.register('genres', GenreViewSet)
 router_v1.register('categories', CategoryViewSet)
 router_v1.register('titles', TitleViewSet)
