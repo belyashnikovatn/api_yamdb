@@ -77,8 +77,98 @@ class UserSerializer(serializers.ModelSerializer):
         fields = ['id', 'username', 'email', 'first_name',
                   'last_name', 'bio', 'role']
 
+from django.core.exceptions import ValidationError
+from django.shortcuts import get_object_or_404
 
-class GenreSerailizer(serializers.ModelSerializer):
+from reviews.models import Category, Comment, Genre, Title, Review
+from users.models import User
+
+
+class SignUpSerializer(serializers.ModelSerializer):
+    """
+    Класс-сериализатор для регистрации пользователей.
+    Проверяет уникальность email и username.
+    """
+    class Meta:
+        model = User
+        fields = ['email', 'username']
+
+    def validate_username(self, value):
+        """
+        Проверяет, что username не равен 'me'.
+
+        - param value: Значение поля username.
+        """
+        if value.lower() == 'me':
+            raise serializers.ValidationError("Юзернейм 'me' недопустим.")
+        return value
+
+    def validate(self, data):
+        """
+        Проверяет, что email и username уникальны.
+
+        - param data: Данные сериализатора.
+        """
+        email = data.get('email')
+        username = data.get('username')
+
+        if User.objects.filter(email=email).exists():
+            raise serializers.ValidationError("Такой email уже существует.")
+        if User.objects.filter(username=username).exists():
+            raise serializers.ValidationError("Такой username уже существует.")
+
+        return data
+
+
+class TokenSerializer(serializers.Serializer):
+    """
+    Класс-сериализатор для получения токена JWT.
+    Проверяет корректность username и кода подтверждения.
+
+    Наследуем от сериализатора класса Serializer, а не модели, так как:
+    - не требуется создавать или обновлять объекты модели.
+    - требуется только проводить валидацию переданных значений.
+    """
+    username = serializers.CharField(max_length=150)
+    confirmation_code = serializers.CharField(max_length=100)
+
+    def validate(self, data):
+        """
+        Проверяет наличие пользователя с
+        заданным username и confirmation_code.
+
+        - param data: Входные данные (username и confirmation_code).
+        """
+        username = data.get('username')
+        confirmation_code = data.get('confirmation_code')
+
+        try:
+            user = User.objects.get(username=username,
+                                    confirmation_code=confirmation_code)
+        except User.DoesNotExist:
+            raise serializers.ValidationError('Неверное имя пользователя'
+                                              ' или код подтверждения')
+
+        # добавляем найденного пользователя в словарь data под ключом 'user'
+        data['user'] = user
+
+        return data
+
+
+class UserSerializer(serializers.ModelSerializer):
+    """
+    Класс-сериализатор для переопределенной модели пользователя.
+
+    Применяются валидации и ограничения, указанные в модели User.
+    Дополнительные специфические валидации не треубуются.
+    """
+    class Meta:
+        model = User
+        fields = ['id', 'username', 'email', 'first_name',
+                  'last_name', 'bio', 'role']
+
+
+class GenreSerializer(serializers.ModelSerializer):
     """Класс-сериализатор для жанра."""
 
     class Meta:
@@ -86,7 +176,7 @@ class GenreSerailizer(serializers.ModelSerializer):
         fields = ('name', 'slug',)
 
 
-class CategorySerailizer(serializers.ModelSerializer):
+class CategorySerializer(serializers.ModelSerializer):
     """Класс-сериализатор для категории."""
 
     class Meta:
@@ -94,20 +184,21 @@ class CategorySerailizer(serializers.ModelSerializer):
         fields = ('name', 'slug')
 
 
-class TitleReadOnlySerailizer(serializers.ModelSerializer):
+class TitleReadOnlySerializer(serializers.ModelSerializer):
     """Класс-сериализатор для произведений: метод get."""
-    genre = GenreSerailizer(many=True, read_only=True)
-    category = CategorySerailizer(read_only=True)
+    genre = GenreSerializer(many=True, read_only=True)
+    category = CategorySerializer(read_only=True)
     # тут пока заглушка
     rating = 0
 
     class Meta:
         model = Title
-        fields = ('id', 'name', 'year', 'rating',
+        fields = ('id', 'name', 'year',
+                #   'rating',  раскоменчу после задачи Руслана
                   'description', 'genre', 'category')
 
 
-class TitleSerailizer(serializers.ModelSerializer):
+class TitleSerializer(serializers.ModelSerializer):
     """Класс-сериализатор для произведений: методы кроме get."""
     genre = serializers.SlugRelatedField(
         slug_field='slug',
@@ -122,3 +213,50 @@ class TitleSerailizer(serializers.ModelSerializer):
     class Meta:
         model = Title
         fields = ('id', 'name', 'year', 'description', 'genre', 'category')
+
+
+class ReviewSerializer(serializers.ModelSerializer):
+    title = serializers.SlugRelatedField(
+        slug_field='name',
+        read_only=True
+    )
+    author = serializers.SlugRelatedField(
+        slug_field='username',
+        read_only=True
+    )
+
+    def validate_score(self, value):
+        if not (1 <= value <= 10):
+            raise serializers.ValidationError('Оценка по 10-бальной шкале!')
+        return value
+
+    def validate(self, data):
+        request = self.context['request']
+        author = request.user
+        title_id = self.context.get('view').kwargs.get('title_id')
+        title = get_object_or_404(Title, pk=title_id)
+        if (
+            request.method == 'POST'
+            and Review.objects.filter(title=title, author=author).exists()
+        ):
+            raise ValidationError('Может существовать только один отзыв!')
+        return data
+
+    class Meta:
+        fields = '__all__'
+        model = Review
+
+
+# class CommentSerializer(serializers.ModelSerializer):
+#     review = serializers.PrimaryKeyRelatedField(
+#         queryset=Review.objects.all(),
+#         read_only=True
+#     )
+#     author = serializers.SlugRelatedField(
+#         slug_field='username',
+#         read_only=True
+#     )
+
+#     class Meta:
+#         fields = '__all__'
+#         model = Comment

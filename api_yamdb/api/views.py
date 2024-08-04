@@ -19,10 +19,10 @@ from api.serializers import (
     SignUpSerializer,
     TokenSerializer,
     UserSerializer,
-    GenreSerailizer,
-    CategorySerailizer,
-    TitleSerailizer,
-    TitleReadOnlySerailizer
+    GenreSerializer,
+    CategorySerializer,
+    TitleSerializer,
+    TitleReadOnlySerializer
 )
 from api.permissions import (IsAdminOrReadOnly,
                              IsAdminOrSuperuser,)
@@ -138,6 +138,7 @@ class UserViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=['get', 'patch'], url_path='me',
             permission_classes=(permissions.IsAuthenticated,))
+
     def me(self, request):
         """
         Обрабатывает GET и PATCH запросы для
@@ -171,22 +172,28 @@ class NameSlugModelViewSet(mixins.CreateModelMixin,
 
 
 class GenreViewSet(NameSlugModelViewSet):
-    """Вьюсет для жанра."""
-    serializer_class = GenreSerailizer
+    """Вьюсет для жанра.
+    Доступные действия: просмотр списка, добавление, удаление,
+    поиск по наименованию (регистр учитывается)."""
+    serializer_class = GenreSerializer
     queryset = Genre.objects.all()
     permission_classes = (IsAdminOrReadOnly,)
 
 
 class CategoryViewSet(NameSlugModelViewSet):
-    """Вьюсет для категории."""
-    serializer_class = CategorySerailizer
+    """Вьюсет для категории.
+    Доступные действия: просмотр списка, добавление, удаление,
+    поиск по наименованию (регистр учитывается)."""
+    serializer_class = CategorySerializer
     queryset = Category.objects.all()
     permission_classes = (IsAdminOrReadOnly,)
 
 
 class TitleViewSet(viewsets.ModelViewSet):
-    """Вьюсет для произведений."""
-    serializer_class = TitleSerailizer
+    """Вьюсет для произведений.
+    Доступные действия: весь набор.
+    Поиск по полям: название, год, slug жанры(ы), slug категория."""
+    serializer_class = TitleSerializer
     queryset = Title.objects.all()
     filter_backends = (DjangoFilterBackend,)
     filterset_fields = ('name', 'year', 'genre__slug', 'category__slug')
@@ -194,5 +201,5 @@ class TitleViewSet(viewsets.ModelViewSet):
 
     def get_serializer_class(self):
         if self.request.method == 'GET':
-            return TitleReadOnlySerailizer
-        return TitleSerailizer
+            return TitleReadOnlySerializer
+        return TitleSerializer
