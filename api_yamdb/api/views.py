@@ -35,7 +35,8 @@ from api.serializers import (
     CommentSerializer
 )
 from api.permissions import (IsAdminOrReadOnly,
-                             IsAdminOrSuperuser,)
+                             IsAdminOrSuperuser,
+                             IsAuthorOrModeratorOrAdmin)
 from django_filters.rest_framework import DjangoFilterBackend
 import random
 import string
@@ -187,8 +188,6 @@ class GenreViewSet(NameSlugModelViewSet):
     поиск по наименованию (регистр учитывается)."""
     serializer_class = GenreSerializer
     queryset = Genre.objects.all()
-    # permission_classes = (IsAdminOrReadOnly,)
-
 
 
 class CategoryViewSet(NameSlugModelViewSet):
@@ -197,7 +196,6 @@ class CategoryViewSet(NameSlugModelViewSet):
     поиск по наименованию (регистр учитывается)."""
     serializer_class = CategorySerializer
     queryset = Category.objects.all()
-    # permission_classes = (IsAdminOrReadOnly,)
 
 
 class TitleViewSet(viewsets.ModelViewSet):
@@ -208,7 +206,6 @@ class TitleViewSet(viewsets.ModelViewSet):
     queryset = Title.objects.all()
     filter_backends = (DjangoFilterBackend,)
     filterset_fields = ('name', 'year', 'genre__slug', 'category__slug')
-    # permission_classes = (IsAdminOrReadOnly,)
 
     def get_serializer_class(self):
         if self.request.method == 'GET':
@@ -218,7 +215,7 @@ class TitleViewSet(viewsets.ModelViewSet):
 
 class ReviewViewSet(ModelViewSet):
     serializer_class = ReviewSerializer
-    permission_classes = [IsAdminOrReadOnly]
+    permission_classes = (IsAuthorOrModeratorOrAdmin,)
 
     def get_serializer_context(self):
         context = super(ReviewViewSet, self).get_serializer_context()
@@ -237,7 +234,7 @@ class ReviewViewSet(ModelViewSet):
 
 class CommentViewSet(ModelViewSet):
     serializer_class = CommentSerializer
-    permission_classes = [IsAdminOrReadOnly]
+    permission_classes = (IsAuthorOrModeratorOrAdmin,)
 
     def get_queryset(self):
         review = get_object_or_404(
