@@ -42,9 +42,7 @@ class User(AbstractUser):
     bio = models.TextField('О себе', blank=True)
     confirmation_code = models.CharField(
         'Код подтверждения',
-        max_length=100,
-        default='Default token'
-    )
+        max_length=100)
 
     class Meta:
         verbose_name = 'пользователь'

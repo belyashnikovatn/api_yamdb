@@ -27,22 +27,6 @@ class SignUpSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("Юзернейм 'me' недопустим.")
         return value
 
-    def validate(self, data):
-        """
-        Проверяет, что email и username уникальны.
-        """
-        email = data.get('email')
-        username = data.get('username')
-
-        if User.objects.filter(email=email, username=username).exists():
-            return data
-        if User.objects.filter(email=email).exists():
-            raise serializers.ValidationError("Такой email уже существует.")
-        if User.objects.filter(username=username).exists():
-            raise serializers.ValidationError("Такой username уже существует.")
-
-        return data
-
 
 class TokenSerializer(serializers.Serializer):
     """
