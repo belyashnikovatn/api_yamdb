@@ -138,7 +138,8 @@ class Review(AuthorTextPubDateBaseModel):
     title = models.ForeignKey(
         Title,
         on_delete=models.CASCADE,
-        verbose_name='Произведение'
+        verbose_name='Произведение',
+        related_name='reviews'
     )
     score = models.PositiveSmallIntegerField(
         verbose_name='Оценка',

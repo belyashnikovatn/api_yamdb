@@ -102,13 +102,17 @@ class TitleReadOnlySerializer(serializers.ModelSerializer):
     """Класс-сериализатор для произведений: метод get."""
     genre = GenreSerializer(many=True, read_only=True)
     category = CategorySerializer(read_only=True)
-    # тут пока заглушка
-    rating = 0
+    rating = serializers.SerializerMethodField()
+
+    def get_rating(self, obj):
+        if obj.reviews.count() == 0:
+            return None
+        review_aggregate = (obj.reviews.aggregate(rating=Avg('score')))
+        return review_aggregate['rating']
 
     class Meta:
         model = Title
-        fields = ('id', 'name', 'year',
-                #   'rating',  раскоменчу после задачи Руслана
+        fields = ('id', 'name', 'year', 'rating',
                   'description', 'genre', 'category')
 
 
