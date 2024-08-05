@@ -9,7 +9,7 @@ from rest_framework.decorators import action
 from rest_framework.pagination import PageNumberPagination
 from rest_framework import permissions
 from rest_framework.exceptions import ValidationError
-from rest_framework import serializers
+# from rest_framework import serializers
 
 from rest_framework.viewsets import ModelViewSet
 from django.shortcuts import get_object_or_404
@@ -32,18 +32,24 @@ from api.serializers import (
     TitleSerializer,
     TitleReadOnlySerializer,
     ReviewSerializer,
-    CommentSerializer
+    CommentSerializer,
 )
-from api.permissions import (IsAdminOrReadOnly,
-                             IsAdminOrSuperuser,
+from api.permissions import (IsAdminOrSuperuser,
                              IsAuthorOrModeratorOrAdmin)
 from django_filters.rest_framework import DjangoFilterBackend
 import random
 import string
 from django.core.mail import send_mail
 from django.conf import settings
+from rest_framework.views import APIView
+
+import logging
+
+logger = logging.getLogger(__name__)
 
 # TEST
+
+
 class SignUpView(generics.CreateAPIView):
     serializer_class = SignUpSerializer
     permission_classes = (permissions.AllowAny,)
@@ -114,8 +120,9 @@ class TokenView(generics.CreateAPIView):
 
         # Создаем JWT-токен для пользователя
         access_token = AccessToken.for_user(user)
-        
-        return Response({'token': str(access_token)}, status=status.HTTP_200_OK)
+
+        return Response({'token': str(access_token)},
+                        status=status.HTTP_200_OK)
 
 
 class UserViewSet(viewsets.ModelViewSet):
@@ -142,7 +149,6 @@ class UserViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=['get', 'patch'], url_path='me',
             permission_classes=(permissions.IsAuthenticated,))
-
     def me(self, request):
         """
         Обрабатывает GET и PATCH запросы для
