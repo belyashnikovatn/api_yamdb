@@ -9,7 +9,7 @@ from rest_framework.decorators import action
 from rest_framework.pagination import PageNumberPagination
 from rest_framework import permissions
 from rest_framework.exceptions import ValidationError
-from rest_framework import serializers
+# from rest_framework import serializers
 
 from rest_framework.viewsets import ModelViewSet
 from django.shortcuts import get_object_or_404
@@ -32,32 +32,25 @@ from api.serializers import (
     TitleSerializer,
     TitleReadOnlySerializer,
     ReviewSerializer,
-    CommentSerializer
+    CommentSerializer,
 )
-from api.permissions import (IsAdminOrReadOnly,
-                             IsAdminOrSuperuser,
+from api.permissions import (IsAdminOrSuperuser,
                              IsAuthorOrModeratorOrAdmin)
 from django_filters.rest_framework import DjangoFilterBackend
 import random
 import string
 from django.core.mail import send_mail
 from django.conf import settings
+from rest_framework.views import APIView
+
+import logging
+
+logger = logging.getLogger(__name__)
+
+# TEST
 
 
 class SignUpView(generics.CreateAPIView):
-    """
-    Вью для регистрации пользователя.
-    Этот класс обрабатывает только POST-запросы которые
-    приходят на эндпоинт /api/v1/auth/signup/.
-
-    Данный вью-класс использует сериализатор SignUpSerializer для
-    валидации значений, переданных пользователем.
-
-    Создает нового пользователя и отправляет код подтверждения.
-
-    Модель, в которой будет создан новый
-    пользователь определяется в сериализаторе.
-    """
     serializer_class = SignUpSerializer
     permission_classes = (permissions.AllowAny,)
 
@@ -65,12 +58,19 @@ class SignUpView(generics.CreateAPIView):
         """
         Создаем нового пользователя и сразу отправляем ему
         код подтверждения на email.
-
-        :param serializer: Сериализатор с данными пользователя.
         """
-        user = serializer.save()
+        username = serializer.validated_data['username']
+        email = serializer.validated_data['email']
+
+        # Попытка получить или создать пользователя
+        user, _ = User.objects.get_or_create(
+            username=username,
+            email=email,
+        )
+        # Генерация нового кода подтверждения
         confirmation_code = ''.join(
-            random.choices(string.ascii_letters + string.digits, k=20))
+            random.choices(string.ascii_letters + string.digits, k=20)
+        )
         user.confirmation_code = confirmation_code
         user.save()
         send_mail(
@@ -80,7 +80,6 @@ class SignUpView(generics.CreateAPIView):
             [user.email],
             fail_silently=False,
         )
-        return Response(serializer.data, status=status.HTTP_200_OK)
 
     def create(self, request, *args, **kwargs):
         response = super().create(request, *args, **kwargs)
@@ -121,8 +120,9 @@ class TokenView(generics.CreateAPIView):
 
         # Создаем JWT-токен для пользователя
         access_token = AccessToken.for_user(user)
-        
-        return Response({'token': str(access_token)}, status=status.HTTP_200_OK)
+
+        return Response({'token': str(access_token)},
+                        status=status.HTTP_200_OK)
 
 
 class UserViewSet(viewsets.ModelViewSet):
@@ -149,7 +149,6 @@ class UserViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=['get', 'patch'], url_path='me',
             permission_classes=(permissions.IsAuthenticated,))
-
     def me(self, request):
         """
         Обрабатывает GET и PATCH запросы для

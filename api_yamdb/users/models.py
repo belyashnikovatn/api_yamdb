@@ -4,6 +4,7 @@ from django.db import models
 from django.utils.translation import gettext_lazy as _
 
 
+
 class User(AbstractUser):
     """Расширенная модель пользователя.
     Переопрделяет и добавляет поля:
@@ -22,13 +23,15 @@ class User(AbstractUser):
         ADMIN = 'admin', _('Admin')
 
     role = models.CharField(
-        'Роль',
+        verbose_name='Роль',
         max_length=100,
         choices=Role.choices,
         default=Role.USER,
     )
     username = models.CharField(
-        'Никнейм',
+        verbose_name='Никнейм',
+        blank=False,
+        null=False,
         unique=True,
         max_length=150,
         validators=[RegexValidator(
@@ -36,15 +39,22 @@ class User(AbstractUser):
             message='Unacceptable symbol'
         )]
     )
-    email = models.EmailField('Почта', unique=True, max_length=254)
-    first_name = models.CharField('Имя', max_length=150, blank=True)
-    last_name = models.CharField('Фамилия', max_length=150, blank=True)
-    bio = models.TextField('О себе', blank=True)
+    email = models.EmailField(verbose_name='Почта',
+                              blank=False,
+                              null=False,
+                              unique=True,
+                              max_length=254)
+    first_name = models.CharField(verbose_name='Имя',
+                                  max_length=150,
+                                  blank=True)
+    last_name = models.CharField(verbose_name='Фамилия',
+                                 max_length=150,
+                                 blank=True)
+    bio = models.TextField(verbose_name='О себе',
+                           blank=True)
     confirmation_code = models.CharField(
-        'Код подтверждения',
-        max_length=100,
-        default='Default token'
-    )
+        verbose_name='Код подтверждения',
+        max_length=100)
 
     class Meta:
         verbose_name = 'пользователь'
