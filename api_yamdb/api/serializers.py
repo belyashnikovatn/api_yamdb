@@ -9,6 +9,7 @@ from reviews.models import Category, Comment, Genre, Title, Review
 from users.models import User
 from reviews.models import Category, Genre, Title
 from users.models import User
+from api.validators import validate_data
 
 
 class SignUpSerializer(serializers.Serializer):
@@ -60,7 +61,7 @@ class UserSerializer(serializers.ModelSerializer):
     """
     class Meta:
         model = User
-        fields = ['id', 'username', 'email', 'first_name',
+        fields = ['username', 'email', 'first_name',
                   'last_name', 'bio', 'role']
 
 
