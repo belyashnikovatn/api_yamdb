@@ -215,9 +215,10 @@ class TitleViewSet(viewsets.ModelViewSet):
     serializer_class = TitleSerializer
     queryset = Title.objects.all()
     filter_backends = (DjangoFilterBackend,)
+    http_method_names = ['get', 'post', 'patch', 'delete']
 
     filterset_class = TitleFilter
-    permission_classes = [IsAdminOrReadOnly]
+    permission_classes = (IsAdminOrReadOnly,)
 
     def get_serializer_class(self):
         if self.request.method == 'GET':
@@ -228,6 +229,7 @@ class TitleViewSet(viewsets.ModelViewSet):
 class ReviewViewSet(ModelViewSet):
     serializer_class = ReviewSerializer
     permission_classes = (IsAuthorOrModeratorOrAdmin,)
+    http_method_names = ['get', 'post', 'patch', 'delete']
 
     def get_serializer_context(self):
         context = super(ReviewViewSet, self).get_serializer_context()
