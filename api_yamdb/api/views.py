@@ -49,6 +49,12 @@ logger = logging.getLogger(__name__)
 
 # TEST
 
+import logging
+
+logger = logging.getLogger(__name__)
+
+# TEST
+
 
 class SignUpView(generics.CreateAPIView):
     serializer_class = SignUpSerializer
