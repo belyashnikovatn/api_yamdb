@@ -1,3 +1,4 @@
+from django.db.models import Avg
 from rest_framework import serializers
 from django.contrib.auth.tokens import default_token_generator as dtg
 from django.shortcuts import get_object_or_404
