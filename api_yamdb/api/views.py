@@ -152,6 +152,8 @@ class UserViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAdminOrSuperuser,)
     filter_backends = (SearchFilter,)
     search_fields = ('username',)
+    lookup_field = 'username'
+    http_method_names = ['get', 'post', 'patch', 'delete']
 
     @action(detail=False, methods=['get', 'patch'], url_path='me',
             permission_classes=(permissions.IsAuthenticated,))
