@@ -227,6 +227,7 @@ class TitleViewSet(viewsets.ModelViewSet):
 class ReviewViewSet(ModelViewSet):
     serializer_class = ReviewSerializer
     permission_classes = (IsAuthorOrModeratorOrAdmin,)
+    http_method_names = ['get', 'post', 'patch', 'delete']
 
     def get_serializer_context(self):
         context = super(ReviewViewSet, self).get_serializer_context()
