@@ -55,6 +55,7 @@ logger = logging.getLogger(__name__)
 
 # TEST
 from api.permissions import IsAdminOrReadOnly
+from api.filters import TitleFilter
 
 class SignUpView(generics.CreateAPIView):
     serializer_class = SignUpSerializer
@@ -214,7 +215,7 @@ class TitleViewSet(viewsets.ModelViewSet):
     serializer_class = TitleSerializer
     queryset = Title.objects.all()
     filter_backends = (DjangoFilterBackend,)
-    filterset_fields = ('name', 'year', 'genre__slug', 'category__slug')
+    filterset_class = TitleFilter
     permission_classes = [IsAdminOrReadOnly]
 
     def get_serializer_class(self):
