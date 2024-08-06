@@ -187,6 +187,7 @@ class NameSlugModelViewSet(mixins.CreateModelMixin,
     """Абстрактный класс для вьюсетов категория/жанр."""
     filter_backends = (filters.SearchFilter,)
     search_fields = ('name',)
+    lookup_field = 'slug'
 
 
 class GenreViewSet(NameSlugModelViewSet):
