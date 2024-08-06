@@ -4,7 +4,6 @@ from django.db import models
 from django.utils.translation import gettext_lazy as _
 
 
-
 class User(AbstractUser):
     """Расширенная модель пользователя.
     Переопрделяет и добавляет поля:

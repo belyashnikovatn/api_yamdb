@@ -8,30 +8,19 @@ from reviews.models import Category, Comment, Genre, Title, Review
 from users.models import User
 from reviews.models import Category, Genre, Title
 from users.models import User
-from django.core.validators import RegexValidator
+from api.validators import validate_data
 
 
 class SignUpSerializer(serializers.Serializer):
-    email = serializers.EmailField(max_length=254)
-    username = serializers.CharField(max_length=150,
-                                     validators=[RegexValidator(
-                                         regex=r'^[\w.@+-]+\Z',
-                                         message="Юзернейм должен содержать только буквы, цифры и символы: . @ + - _")])
     """
     Класс-сериализатор для регистрации пользователей.
     Проверяет уникальность email и username.
     """
-    class Meta:
-        model = User
-        fields = ('email', 'username',)
+    email = serializers.EmailField(max_length=254)
+    username = serializers.CharField(max_length=150)
 
-    def validate_username(self, value):
-        """
-        Проверяет, что username не равен 'me'.
-        """
-        if value.lower() == 'me':
-            raise serializers.ValidationError("Юзернейм 'me' недопустим.")
-        return value
+    def validate(self, data):
+        return validate_data(data)
 
 
 class TokenSerializer(serializers.Serializer):
