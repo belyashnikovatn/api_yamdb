@@ -1,3 +1,4 @@
+from django.db.models import Avg
 from rest_framework import serializers
 from django.contrib.auth.tokens import default_token_generator as dtg
 from django.shortcuts import get_object_or_404
@@ -8,19 +9,21 @@ from reviews.models import Category, Comment, Genre, Title, Review
 from users.models import User
 from reviews.models import Category, Genre, Title
 from users.models import User
-from api.validators import validate_data
 
 
 class SignUpSerializer(serializers.Serializer):
+
     """
     Класс-сериализатор для регистрации пользователей.
     Проверяет уникальность email и username.
     """
+
     email = serializers.EmailField(max_length=254)
     username = serializers.CharField(max_length=150)
 
     def validate(self, data):
         return validate_data(data)
+
 
 
 class TokenSerializer(serializers.Serializer):

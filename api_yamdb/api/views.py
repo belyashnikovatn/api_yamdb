@@ -41,6 +41,13 @@ import random
 import string
 from django.core.mail import send_mail
 from django.conf import settings
+from rest_framework.views import APIView
+
+import logging
+
+logger = logging.getLogger(__name__)
+
+# TEST
 
 import logging
 
