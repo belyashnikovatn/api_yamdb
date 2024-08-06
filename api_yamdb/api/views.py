@@ -54,7 +54,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 # TEST
-
+from api.permissions import IsAdminOrReadOnly
 
 class SignUpView(generics.CreateAPIView):
     serializer_class = SignUpSerializer
@@ -188,6 +188,7 @@ class NameSlugModelViewSet(mixins.CreateModelMixin,
     filter_backends = (filters.SearchFilter,)
     search_fields = ('name',)
     lookup_field = 'slug'
+    permission_classes = [IsAdminOrReadOnly]
 
 
 class GenreViewSet(NameSlugModelViewSet):
