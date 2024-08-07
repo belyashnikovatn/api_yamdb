@@ -17,6 +17,7 @@ User = get_user_model()
 
 class NameSlugModel(models.Model):
     """Абстрактный класс для категории и жанра."""
+
     name = models.CharField('Название', max_length=256)
     slug = models.SlugField(
         'slug',
@@ -55,6 +56,7 @@ class Category(NameSlugModel):
 
 class Title(models.Model):
     """Класс модели данных для произведений."""
+
     name = models.CharField('Название', max_length=256)
     year = models.PositiveIntegerField(
         'Год выпуска',
@@ -94,6 +96,7 @@ class Title(models.Model):
 
 class GenreTitle(models.Model):
     """Класс модели данных для жанров конкретных произведений."""
+
     title = models.ForeignKey(Title, on_delete=models.CASCADE)
     genre = models.ForeignKey(Genre, on_delete=models.CASCADE)
 
