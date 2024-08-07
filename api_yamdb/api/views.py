@@ -14,6 +14,7 @@ from rest_framework_simplejwt.tokens import AccessToken
 from django.conf import settings
 from django.contrib.auth.tokens import default_token_generator as dtg
 from django.core.mail import send_mail
+from django.db.models import Avg
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 
@@ -161,6 +162,7 @@ class NameSlugModelViewSet(mixins.CreateModelMixin,
                            mixins.DestroyModelMixin,
                            viewsets.GenericViewSet):
     """Абстрактный класс для вьюсетов категория/жанр."""
+
     filter_backends = (filters.SearchFilter,)
     search_fields = ('name',)
     lookup_field = 'slug'
@@ -171,6 +173,7 @@ class GenreViewSet(NameSlugModelViewSet):
     """Вьюсет для жанра.
     Доступные действия: просмотр списка, добавление, удаление,
     поиск по наименованию (регистр учитывается)."""
+
     serializer_class = GenreSerializer
     queryset = Genre.objects.all()
 
@@ -179,6 +182,7 @@ class CategoryViewSet(NameSlugModelViewSet):
     """Вьюсет для категории.
     Доступные действия: просмотр списка, добавление, удаление,
     поиск по наименованию (регистр учитывается)."""
+
     serializer_class = CategorySerializer
     queryset = Category.objects.all()
 
@@ -187,15 +191,17 @@ class TitleViewSet(viewsets.ModelViewSet):
     """Вьюсет для произведений.
     Доступные действия: весь набор.
     Поиск по полям: название, год, slug жанры(ы), slug категория."""
-    serializer_class = TitleSerializer
-    queryset = Title.objects.all()
+
+    queryset = Title.objects.annotate(
+        rating=Avg('reviews__score')).order_by('rating')
     filter_backends = (DjangoFilterBackend,)
     http_method_names = ['get', 'post', 'patch', 'delete']
     filterset_class = TitleFilter
     permission_classes = (IsAdminOrReadOnly,)
+    ordering_fields = ('name',)
 
     def get_serializer_class(self):
-        if self.request.method == 'GET':
+        if self.request.method in permissions.SAFE_METHODS:
             return TitleReadOnlySerializer
         return TitleSerializer
 

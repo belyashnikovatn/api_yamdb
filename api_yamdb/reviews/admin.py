@@ -1,9 +1,9 @@
 from django.contrib import admin
 
-from reviews.models import Category, Genre, Title, Review, Comment
+from reviews.models import Category, Comment, Genre, Review, Title
 
 
-class CustomModelAdmin(admin.ModelAdmin):
+class DisplayModelAdmin(admin.ModelAdmin):
     """Custom base for all classes."""
 
     def __init__(self, model, admin_site):
@@ -11,29 +11,37 @@ class CustomModelAdmin(admin.ModelAdmin):
         self.list_display = [
             field.name for field in model._meta.fields if field.name != 'id'
         ]
-        super(CustomModelAdmin, self).__init__(model, admin_site)
+        super().__init__(model, admin_site)
 
 
 @admin.register(Category)
-class CategoryAdmin(CustomModelAdmin):
+class CategoryAdmin(DisplayModelAdmin):
     """Admin Category."""
 
 
 @admin.register(Genre)
-class GenreAdmin(CustomModelAdmin):
+class GenreAdmin(DisplayModelAdmin):
     """Admin Genre."""
 
 
 @admin.register(Title)
-class TitleAdmin(CustomModelAdmin):
+class TitleAdmin(DisplayModelAdmin):
     """Admin Title."""
+
+    list_editable = (
+        'category',
+    )
+    list_display = ('name', 'genres')
+
+    def genres(self, obj):
+        return obj.genres.all()
 
 
 @admin.register(Review)
-class ReviewAdmin(CustomModelAdmin):
+class ReviewAdmin(DisplayModelAdmin):
     """Admin Review."""
 
 
 @admin.register(Comment)
-class CommentAdmin(CustomModelAdmin):
+class CommentAdmin(DisplayModelAdmin):
     """Admin Comment."""
