@@ -188,16 +188,16 @@ class TitleViewSet(viewsets.ModelViewSet):
     """Вьюсет для произведений.
     Доступные действия: весь набор.
     Поиск по полям: название, год, slug жанры(ы), slug категория."""
-    serializer_class = TitleSerializer
     queryset = Title.objects.annotate(
         rating=Avg('reviews__score')).order_by('rating')
     filter_backends = (DjangoFilterBackend,)
     http_method_names = ['get', 'post', 'patch', 'delete']
     filterset_class = TitleFilter
     permission_classes = (IsAdminOrReadOnly,)
+    ordering_fields = ('name',)
 
     def get_serializer_class(self):
-        if self.request.method == 'GET':
+        if self.request.method in permissions.SAFE_METHODS:
             return TitleReadOnlySerializer
         return TitleSerializer
 
