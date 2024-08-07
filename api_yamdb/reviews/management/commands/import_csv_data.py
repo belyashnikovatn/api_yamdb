@@ -2,7 +2,6 @@ import csv
 import logging
 import os
 
-from django.conf import settings
 from django.core.management.base import BaseCommand
 
 from api_yamdb.settings import CSV_FILES_DIRS
