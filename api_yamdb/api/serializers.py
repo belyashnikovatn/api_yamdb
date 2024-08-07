@@ -7,7 +7,9 @@ from django.shortcuts import get_object_or_404
 
 from api.validators import validate_data
 from reviews.models import Category, Comment, Genre, Review, Title
-from reviews.constants import (EMAIL_MAX_LENGTH, USERNAME_MAX_LENGTH)
+from reviews.constants import (EMAIL_MAX_LENGTH,
+                               USERNAME_MAX_LENGTH,
+                               CONFIRMATION_CODE_MAX_LENGTH)
 from users.models import User
 
 
@@ -24,20 +26,42 @@ class SignUpSerializer(serializers.Serializer):
 class TokenSerializer(serializers.Serializer):
     """
     Класс-сериализатор для получения токена JWT.
-    Проверяет корректность username и кода подтверждения.
 
-    Наследуем от сериализатора класса Serializer, а не модели, так как:
-    - не требуется создавать или обновлять объекты модели.
-    - требуется только проводить валидацию переданных значений.
+    Проверяет корректность username и кода подтверждения.
+    Наследуем от класса Serializer, а не ModelSerializer, так как:
+    1. не требуется создавать или обновлять объекты модели.
+    2. требуется только проводить валидацию переданных значений.
+
+    Атрибуты
+    --------
+    username : Имя зарегестрированного пользователя, который получает токен.
+    confirmation_code : Код, полученный пользователем на email.
+
+    Методы
+    ------
+    validate(data (dict)) : Проверка корректности username и confirmation_code.
     """
-    username = serializers.CharField(max_length=150)
-    confirmation_code = serializers.CharField(max_length=100)
+
+    username = serializers.CharField(max_length=USERNAME_MAX_LENGTH)
+    confirmation_code = serializers.CharField(
+        max_length=CONFIRMATION_CODE_MAX_LENGTH)
 
     class Meta:
+        """
+        Метакласс для настройки сериализатора.
+
+        Атрибуты
+        --------
+        model : Модель, для которой применяется сериализатор (User).
+        fields : Поля, по которым будет происходить сериализация.
+        """
+
         model = User
         fields = ('username', 'confirmation_code')
 
     def validate(self, data):
+        """Валидирует data и возращает провалидированный словарь data."""
+
         username = data.get('username')
         confirmation_code = data.get('confirmation_code')
         user = get_object_or_404(User, username=username)
