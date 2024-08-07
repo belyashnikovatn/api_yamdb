@@ -162,6 +162,7 @@ class NameSlugModelViewSet(mixins.CreateModelMixin,
                            mixins.DestroyModelMixin,
                            viewsets.GenericViewSet):
     """Абстрактный класс для вьюсетов категория/жанр."""
+
     filter_backends = (filters.SearchFilter,)
     search_fields = ('name',)
     lookup_field = 'slug'
@@ -172,6 +173,7 @@ class GenreViewSet(NameSlugModelViewSet):
     """Вьюсет для жанра.
     Доступные действия: просмотр списка, добавление, удаление,
     поиск по наименованию (регистр учитывается)."""
+
     serializer_class = GenreSerializer
     queryset = Genre.objects.all()
 
@@ -180,6 +182,7 @@ class CategoryViewSet(NameSlugModelViewSet):
     """Вьюсет для категории.
     Доступные действия: просмотр списка, добавление, удаление,
     поиск по наименованию (регистр учитывается)."""
+
     serializer_class = CategorySerializer
     queryset = Category.objects.all()
 
@@ -188,6 +191,7 @@ class TitleViewSet(viewsets.ModelViewSet):
     """Вьюсет для произведений.
     Доступные действия: весь набор.
     Поиск по полям: название, год, slug жанры(ы), slug категория."""
+
     queryset = Title.objects.annotate(
         rating=Avg('reviews__score')).order_by('rating')
     filter_backends = (DjangoFilterBackend,)

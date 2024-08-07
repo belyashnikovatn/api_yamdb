@@ -79,6 +79,7 @@ class CategorySerializer(serializers.ModelSerializer):
 
 class TitleReadOnlySerializer(serializers.ModelSerializer):
     """Класс-сериализатор для произведений: метод get."""
+
     genre = GenreSerializer(many=True, read_only=True)
     category = CategorySerializer(read_only=True)
     rating = serializers.FloatField(read_only=True)
@@ -91,6 +92,7 @@ class TitleReadOnlySerializer(serializers.ModelSerializer):
 
 class TitleSerializer(serializers.ModelSerializer):
     """Класс-сериализатор для произведений: методы кроме get."""
+
     genre = serializers.SlugRelatedField(
         slug_field='slug',
         queryset=Genre.objects.all(),
