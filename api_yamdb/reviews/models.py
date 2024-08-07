@@ -1,15 +1,15 @@
 from datetime import datetime
 
 from django.contrib.auth import get_user_model
-from django.core.validators import (MaxValueValidator, MinValueValidator,
-                                    RegexValidator)
+from django.core.validators import (MaxValueValidator, MinValueValidator)
 from django.db import models
 
 from reviews.constants import (
     MIN_YEAR,
     SLICE_LENGTH,
     MIN_SCORE_VALUE,
-    MAX_SCORE_VALUE
+    MAX_SCORE_VALUE,
+    MODELS_NAME_LENGTH
 )
 
 User = get_user_model()
@@ -18,20 +18,14 @@ User = get_user_model()
 class NameSlugModel(models.Model):
     """Абстрактный класс для категории и жанра."""
 
-    name = models.CharField('Название', max_length=256)
+    name = models.CharField('Название', max_length=MODELS_NAME_LENGTH)
     slug = models.SlugField(
         'slug',
         unique=True,
-        max_length=50,
-        validators=[
-            RegexValidator(
-                regex=r'^[-a-zA-Z0-9_]+$',
-                message='Unacceptable slug'
-            )
-        ]
     )
 
     class Meta:
+        abstract = True
         ordering = ('name',)
 
     def __str__(self):
@@ -57,7 +51,7 @@ class Category(NameSlugModel):
 class Title(models.Model):
     """Класс модели данных для произведений."""
 
-    name = models.CharField('Название', max_length=256)
+    name = models.CharField('Название', max_length=MODELS_NAME_LENGTH)
     year = models.PositiveIntegerField(
         'Год выпуска',
         validators=[
