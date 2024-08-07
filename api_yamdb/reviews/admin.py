@@ -28,6 +28,14 @@ class GenreAdmin(DisplayModelAdmin):
 class TitleAdmin(DisplayModelAdmin):
     """Admin Title."""
 
+    list_editable = (
+        'category',
+    )
+    list_display = ('name', 'genres')
+
+    def genres(self, obj):
+        return obj.genres.all()
+
 
 @admin.register(Review)
 class ReviewAdmin(DisplayModelAdmin):
