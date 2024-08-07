@@ -61,7 +61,6 @@ class TokenSerializer(serializers.Serializer):
 
     def validate(self, data):
         """Валидирует data и возращает провалидированный словарь data."""
-
         username = data.get('username')
         confirmation_code = data.get('confirmation_code')
         user = get_object_or_404(User, username=username)
@@ -71,12 +70,8 @@ class TokenSerializer(serializers.Serializer):
 
 
 class UserSerializer(serializers.ModelSerializer):
-    """
-    Класс-сериализатор для переопределенной модели пользователя.
+    """Сериализатор для переопределенной модели Пользователя."""
 
-    Применяются валидации и ограничения, указанные в модели User.
-    Дополнительные специфические валидации не треубуются.
-    """
     class Meta:
         model = User
         fields = ['username', 'email', 'first_name',
@@ -101,6 +96,7 @@ class CategorySerializer(serializers.ModelSerializer):
 
 class TitleReadOnlySerializer(serializers.ModelSerializer):
     """Класс-сериализатор для произведений: метод get."""
+
     genre = GenreSerializer(many=True, read_only=True)
     category = CategorySerializer(read_only=True)
     rating = serializers.SerializerMethodField()
@@ -119,6 +115,7 @@ class TitleReadOnlySerializer(serializers.ModelSerializer):
 
 class TitleSerializer(serializers.ModelSerializer):
     """Класс-сериализатор для произведений: методы кроме get."""
+
     genre = serializers.SlugRelatedField(
         slug_field='slug',
         queryset=Genre.objects.all(),
