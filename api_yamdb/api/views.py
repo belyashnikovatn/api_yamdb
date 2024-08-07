@@ -201,26 +201,27 @@ class TitleViewSet(viewsets.ModelViewSet):
 
 
 class ReviewViewSet(ModelViewSet):
+    """Вьюсет для ревью."""
+
     serializer_class = ReviewSerializer
     permission_classes = (IsAuthorOrModeratorOrAdmin,)
     http_method_names = ['get', 'post', 'patch', 'delete']
 
-    def get_serializer_context(self):
-        context = super(ReviewViewSet, self).get_serializer_context()
-        title = get_object_or_404(Title, id=self.kwargs.get('title_id'))
-        context.update({'title': title})
-        return context
+    def get_title(self):
+        return get_object_or_404(Title, pk=self.kwargs.get('title_id'))
 
     def get_queryset(self):
-        title = get_object_or_404(Title, pk=self.kwargs.get('title_id'))
+        title = self.get_title()
         return title.reviews.all()
 
     def perform_create(self, serializer):
-        title = get_object_or_404(Title, pk=self.kwargs.get('title_id'))
+        title = self.get_title()
         serializer.save(author=self.request.user, title=title)
 
 
 class CommentViewSet(ModelViewSet):
+    """Вьюсет для комментариев."""
+
     serializer_class = CommentSerializer
     permission_classes = (
         permissions.IsAuthenticatedOrReadOnly,
@@ -229,14 +230,14 @@ class CommentViewSet(ModelViewSet):
     http_method_names = ['get', 'post', 'patch', 'delete']
 
     def review_query(self):
-        return get_object_or_404(Review, id=self.kwargs.get('review_id'))
-
-    def get_queryset(self):
-        review = get_object_or_404(
+        return get_object_or_404(
             Review,
-            pk=self.kwargs.get('review_id'),
+            id=self.kwargs.get('review_id'),
             title_id=self.kwargs.get('title_id')
         )
+
+    def get_queryset(self):
+        review = self.review_query()
         return review.comments.all()
 
     def perform_create(self, serializer):
