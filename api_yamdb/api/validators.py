@@ -3,7 +3,7 @@ import re
 from django.db.models import Q
 from rest_framework import serializers
 
-from reviews.constants import USERNAME_REGEX
+from reviews.constants import USERNAME_REGEX, FORBIDDEN_USERNAME
 from users.models import User
 
 
@@ -17,8 +17,9 @@ def validate_data(data):
 
         if not re.match(USERNAME_REGEX, username):
             raise serializers.ValidationError('Check username')
-        if username == 'me':
-            raise serializers.ValidationError('Username "me" not allowed')
+        if username == FORBIDDEN_USERNAME:
+            raise serializers.ValidationError(
+                f'Username "{FORBIDDEN_USERNAME}" not allowed')
 
         if (User.objects.filter(
                 Q(email__iexact=email) & ~Q(username__iexact=username))):
