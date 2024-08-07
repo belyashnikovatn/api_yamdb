@@ -10,18 +10,16 @@ class TitleFilter(django_filters.FilterSet):
     Этот фильтр позволяет фильтровать объекты модели Title
     по следующим полям: name, year, genre и category.
 
-    Атрибуты:
-        name - Фильтр по названию, ищет подстроку в поле name.
-        year - Фильтр по году, ищет точное совпадение.
-        genre - Фильтр по жанру, ищет по slug жанра.
-        category - Фильтр по категории, ищет по slug категории.
+    Атрибуты
+    --------
+        name : Фильтр по названию, ищет подстроку в поле name.
+        genre : Фильтр по жанру, ищет по slug жанра.
+        category : Фильтр по категории, ищет по slug категории.
     """
+
     name = django_filters.CharFilter(
         field_name='name',
         lookup_expr='icontains'
-    )
-    year = django_filters.NumberFilter(
-        field_name='year',
     )
     genre = django_filters.CharFilter(
         field_name='genre__slug',
@@ -34,9 +32,11 @@ class TitleFilter(django_filters.FilterSet):
         """
         Метакласс для настройки фильтрации.
 
-        Атрибуты:
-            model - Модель, для которой применяется фильтр (Title).
-            fields - Поля, по которым будет происходить фильтрация.
+        Атрибуты
+        --------
+            model : Модель, для которой применяется фильтр (Title).
+            fields : Поля, по которым будет происходить фильтрация.
         """
+
         model = Title
         fields = ('name', 'year', 'category', 'genre')
