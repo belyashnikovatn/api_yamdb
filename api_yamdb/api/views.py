@@ -1,7 +1,3 @@
-import logging
-import random
-import string
-
 from rest_framework import (filters, generics, mixins, permissions, status,
                             viewsets)
 from rest_framework.decorators import action
@@ -29,18 +25,30 @@ from api.serializers import (CategorySerializer, CommentSerializer,
 from reviews.models import Category, Genre, Review, Title
 from users.models import User
 
-logger = logging.getLogger(__name__)
-
 
 class SignUpView(generics.CreateAPIView):
+    """
+    Представление для регистрации новых пользователей.
+
+    Позволяет любому пользователю зарегистрироваться, отправляя
+    код подтверждения на указанный email.
+
+    Аргументы
+    ---------
+    serializer_class : Класс для валидации и десериализации входящих данных.
+    permission_classes : Класс доступов к эндпоинту данного вью.
+
+    Методы
+    ------
+    perform_create(serializer) : Отправка кодов подтверждений пользователям.
+    create(request) : Обработка запроса на создание пользователя.
+    """
+
     serializer_class = SignUpSerializer
     permission_classes = (permissions.AllowAny,)
 
     def perform_create(self, serializer):
-        """
-        Создаем нового пользователя и сразу отправляем ему
-        код подтверждения на email.
-        """
+        """Поиск или создание пользователя, генерация и отправка кода."""
         username = serializer.validated_data['username']
         email = serializer.validated_data['email']
 
@@ -50,9 +58,7 @@ class SignUpView(generics.CreateAPIView):
             email=email,
         )
         # Генерация нового кода подтверждения
-        confirmation_code = ''.join(
-            random.choices(string.ascii_letters + string.digits, k=20)
-        )
+        confirmation_code = dtg.make_token(user)
         user.confirmation_code = confirmation_code
         user.save()
         send_mail(
@@ -64,6 +70,7 @@ class SignUpView(generics.CreateAPIView):
         )
 
     def create(self, request, *args, **kwargs):
+        """После успешного создания юзера, переопределяет код ответа на 200."""
         response = super().create(request, *args, **kwargs)
         response.status_code = status.HTTP_200_OK
         return response
