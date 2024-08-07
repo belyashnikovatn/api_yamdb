@@ -5,7 +5,12 @@ from django.core.validators import (MaxValueValidator, MinValueValidator,
                                     RegexValidator)
 from django.db import models
 
-from reviews.constants import MINYEAR, SLICELENGTH
+from reviews.constants import (
+    MINYEAR,
+    SLICELENGTH,
+    MIN_SCORE_VALUE,
+    MAX_SCORE_VALUE
+)
 
 User = get_user_model()
 
@@ -109,10 +114,10 @@ class GenreTitle(models.Model):
 
 class AuthorTextPubDateBaseModel(models.Model):
     """Вспомогательный класс, связывающий отзывы и комментарии к ним."""
+
     author = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
-        # related_name='texts',
         verbose_name='Автор'
     )
     text = models.TextField(verbose_name='Текст')
@@ -132,21 +137,21 @@ class AuthorTextPubDateBaseModel(models.Model):
 
 class Review(AuthorTextPubDateBaseModel):
     """Модель для отзыва."""
+
     title = models.ForeignKey(
         Title,
         on_delete=models.CASCADE,
         verbose_name='Произведение',
-        related_name='reviews'
     )
     score = models.PositiveSmallIntegerField(
         verbose_name='Оценка',
         validators=[
             MinValueValidator(
-                1,
+                MIN_SCORE_VALUE,
                 message='Введенная оценка ниже допустимой'
             ),
             MaxValueValidator(
-                10,
+                MAX_SCORE_VALUE,
                 message='Введенная оценка выше допустимой'
             ),
         ]
@@ -166,10 +171,12 @@ class Review(AuthorTextPubDateBaseModel):
 
 class Comment(AuthorTextPubDateBaseModel):
     """Модель для представления комментария к посту."""
+
     review = models.ForeignKey(
         Review,
         on_delete=models.CASCADE,
-        related_name='comments'
+        related_name='comments',
+        verbose_name='Отзыв'
     )
 
     class Meta(AuthorTextPubDateBaseModel.Meta):
