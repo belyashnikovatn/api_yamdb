@@ -1,6 +1,7 @@
 from datetime import datetime
 
 from django.contrib.auth import get_user_model
+from django.core.exceptions import ValidationError
 from django.core.validators import (MaxValueValidator, MinValueValidator)
 from django.db import models
 
@@ -48,21 +49,20 @@ class Category(NameSlugModel):
         verbose_name_plural = 'Категории'
 
 
+def real_year(value):
+    if int(datetime.now().year) <= value < MIN_YEAR:
+        raise ValidationError(
+            'Укажите верный год.'
+        )
+
+
 class Title(models.Model):
     """Класс модели данных для произведений."""
 
     name = models.CharField('Название', max_length=MODELS_NAME_LENGTH)
     year = models.SmallIntegerField(
         'Год выпуска',
-        validators=[
-            MinValueValidator(
-                MIN_YEAR,
-                message='This is not possible!'),
-            MaxValueValidator(
-                int(datetime.now().year),
-                message='This is not possible!'
-            )
-        ]
+        validators=(real_year,),
     )
     description = models.TextField('Описание', blank=True, null=True)
     genre = models.ManyToManyField(
