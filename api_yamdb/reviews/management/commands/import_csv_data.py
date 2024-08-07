@@ -1,19 +1,13 @@
 import csv
-import os
 import logging
+import os
 
 from django.conf import settings
 from django.core.management.base import BaseCommand
 
 from api_yamdb.settings import CSV_FILES_DIRS
-from reviews.models import (
-    Category,
-    Genre,
-    GenreTitle,
-    NameSlugModel,
-    Title,
-    Review
-)
+from reviews.models import (Category, Genre, GenreTitle, NameSlugModel, Review,
+                            Title, Comment, AuthorTextPubDateBaseModel)
 from users.models import User
 
 
@@ -63,7 +57,8 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         # Clean the tables before.
-        tables_to_clean = [NameSlugModel, GenreTitle, Review, Title, User]
+        tables_to_clean = [NameSlugModel, GenreTitle, Review, Title, User,
+                           AuthorTextPubDateBaseModel]
         [clean(table) for table in tables_to_clean]
 
         # Import data into cleaned tables through ORM.
@@ -74,5 +69,6 @@ class Command(BaseCommand):
             'genre_title.csv': GenreTitle,
             'users.csv': User,
             'review.csv': Review,
+            'comments.csv': Comment
         }
         [load(csv_file, model) for csv_file, model in files_models.items()]

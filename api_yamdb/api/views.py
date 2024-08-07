@@ -1,60 +1,33 @@
-from rest_framework import viewsets
-from rest_framework import filters, mixins, viewsets
-from rest_framework import generics
-from rest_framework.response import Response
-from rest_framework import status
-from rest_framework_simplejwt.tokens import AccessToken
-from rest_framework.filters import SearchFilter
-from rest_framework.decorators import action
-from rest_framework.pagination import PageNumberPagination
-from rest_framework import permissions
-from rest_framework.exceptions import ValidationError
-
-from rest_framework.viewsets import ModelViewSet
-from django.shortcuts import get_object_or_404
-from django.contrib.auth.tokens import default_token_generator as dtg
-
-from reviews.models import Title, Genre, Category, Review
-
-from django.shortcuts import get_object_or_404
-from django.contrib.auth.tokens import default_token_generator as dtg
-
-from reviews.models import Title, Genre, Category
-
-from users.models import User
-from api.serializers import (
-    SignUpSerializer,
-    TokenSerializer,
-    UserSerializer,
-    GenreSerializer,
-    CategorySerializer,
-    TitleSerializer,
-    TitleReadOnlySerializer,
-    ReviewSerializer,
-    CommentSerializer,
-)
-from api.permissions import (IsAdminOrSuperuser,
-                             IsAuthorOrModeratorOrAdmin)
-from django_filters.rest_framework import DjangoFilterBackend
+import logging
 import random
 import string
-from django.core.mail import send_mail
+
+from rest_framework import (filters, generics, mixins, permissions, status,
+                            viewsets)
+from rest_framework.decorators import action
+from rest_framework.exceptions import ValidationError
+from rest_framework.filters import SearchFilter
+from rest_framework.pagination import PageNumberPagination
+from rest_framework.response import Response
+from rest_framework.viewsets import ModelViewSet
+from rest_framework_simplejwt.tokens import AccessToken
 from django.conf import settings
-from rest_framework.views import APIView
+from django.contrib.auth.tokens import default_token_generator as dtg
+from django.core.mail import send_mail
+from django.shortcuts import get_object_or_404
+from django_filters.rest_framework import DjangoFilterBackend
 
-import logging
-
-logger = logging.getLogger(__name__)
-
-# TEST
-
-import logging
-
-logger = logging.getLogger(__name__)
-
-# TEST
-from api.permissions import IsAdminOrReadOnly
 from api.filters import TitleFilter
+from api.permissions import IsAdminOrSuperuser, IsAuthorOrModeratorOrAdmin, IsAdminOrReadOnly
+from api.serializers import (CategorySerializer, CommentSerializer,
+                             GenreSerializer, ReviewSerializer,
+                             SignUpSerializer, TitleReadOnlySerializer,
+                             TitleSerializer, TokenSerializer, UserSerializer)
+from reviews.models import Category, Genre, Review, Title
+from users.models import User
+
+logger = logging.getLogger(__name__)
+
 
 class SignUpView(generics.CreateAPIView):
     serializer_class = SignUpSerializer
@@ -218,7 +191,6 @@ class TitleViewSet(viewsets.ModelViewSet):
     filterset_class = TitleFilter
     permission_classes = (IsAdminOrReadOnly,)
 
-
     def get_serializer_class(self):
         if self.request.method == 'GET':
             return TitleReadOnlySerializer
@@ -248,10 +220,10 @@ class ReviewViewSet(ModelViewSet):
 class CommentViewSet(ModelViewSet):
     serializer_class = CommentSerializer
     permission_classes = (permissions.IsAuthenticatedOrReadOnly, IsAuthorOrModeratorOrAdmin)
+    http_method_names = ['get', 'post', 'patch', 'delete']
+
     def review_query(self):
         return get_object_or_404(Review, id=self.kwargs.get('review_id'))
-
-
 
     def get_queryset(self):
         review = get_object_or_404(

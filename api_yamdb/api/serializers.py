@@ -1,15 +1,13 @@
-from django.db.models import Avg
 from rest_framework import serializers
+
 from django.contrib.auth.tokens import default_token_generator as dtg
-from django.shortcuts import get_object_or_404
 from django.core.exceptions import ValidationError
+from django.db.models import Avg
 from django.shortcuts import get_object_or_404
 
-from reviews.models import Category, Comment, Genre, Title, Review
-from users.models import User
-from reviews.models import Category, Genre, Title
-from users.models import User
 from api.validators import validate_data
+from reviews.models import Category, Comment, Genre, Review, Title
+from users.models import User
 
 
 class SignUpSerializer(serializers.Serializer):
@@ -24,7 +22,6 @@ class SignUpSerializer(serializers.Serializer):
 
     def validate(self, data):
         return validate_data(data)
-
 
 
 class TokenSerializer(serializers.Serializer):

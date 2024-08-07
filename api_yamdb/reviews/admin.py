@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from reviews.models import Category, Genre, Title
+from reviews.models import Category, Genre, Title, Review, Comment
 
 
 class CustomModelAdmin(admin.ModelAdmin):
@@ -27,3 +27,13 @@ class GenreAdmin(CustomModelAdmin):
 @admin.register(Title)
 class TitleAdmin(CustomModelAdmin):
     """Admin Title."""
+
+
+@admin.register(Review)
+class ReviewAdmin(CustomModelAdmin):
+    """Admin Review."""
+
+
+@admin.register(Comment)
+class CommentAdmin(CustomModelAdmin):
+    """Admin Comment."""
