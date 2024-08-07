@@ -8,6 +8,9 @@ from django.shortcuts import get_object_or_404
 from api.validators import validate_data
 from reviews.models import Category, Comment, Genre, Review, Title
 from users.models import User
+from reviews.constants import (
+    MAX_SERIALIZER_SCORE, MIN_SERIALIZER_SCORE
+)
 
 
 class SignUpSerializer(serializers.Serializer):
@@ -113,6 +116,7 @@ class TitleSerializer(serializers.ModelSerializer):
         fields = ('id', 'name', 'year', 'description', 'genre', 'category')
 
 
+
 class ReviewSerializer(serializers.ModelSerializer):
     """Класс-сериализатор для ревью."""
 
@@ -125,26 +129,32 @@ class ReviewSerializer(serializers.ModelSerializer):
         read_only=True
     )
 
-    def validate_score(self, value):
-        if not (0 <= value <= 10):
-            raise serializers.ValidationError('Оценка по 10-бальной шкале!')
-        return value
-
-    def validate(self, data):
-        request = self.context['request']
-        author = request.user
-        title_id = self.context.get('view').kwargs.get('title_id')
-        title = get_object_or_404(Title, pk=title_id)
-        if (
-            request.method == 'POST'
-            and Review.objects.filter(title=title, author=author).exists()
-        ):
-            raise ValidationError('Может существовать только один отзыв!')
-        return data
-
     class Meta:
         model = Review
         fields = '__all__'
+
+    def validate_score(self, value):
+        if not (MIN_SERIALIZER_SCORE <= value <= MAX_SERIALIZER_SCORE):
+            raise serializers.ValidationError(
+                f'Оценка должна быть в диапазоне от '
+                f'{MIN_SERIALIZER_SCORE} до '
+                f'{MAX_SERIALIZER_SCORE}!'
+            )
+        return value
+    
+    def validate(self, data):
+        request = self.context['request']
+    
+        if request.method == 'POST':
+            author = request.user
+            title_id = self.context.get('view').kwargs.get('title_id')
+            title = get_object_or_404(Title, pk=title_id)
+        
+            if Review.objects.filter(title=title, author=author).exists():
+                raise ValidationError('Может существовать только один отзыв!')
+    
+        return data
+
 
 
 class CommentSerializer(serializers.ModelSerializer):
