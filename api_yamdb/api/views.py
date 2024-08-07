@@ -9,7 +9,6 @@ from rest_framework.decorators import action
 from rest_framework.pagination import PageNumberPagination
 from rest_framework import permissions
 from rest_framework.exceptions import ValidationError
-# from rest_framework import serializers
 
 from rest_framework.viewsets import ModelViewSet
 from django.shortcuts import get_object_or_404
@@ -215,9 +214,10 @@ class TitleViewSet(viewsets.ModelViewSet):
     serializer_class = TitleSerializer
     queryset = Title.objects.all()
     filter_backends = (DjangoFilterBackend,)
-    filterset_class = TitleFilter
-    permission_classes = [IsAdminOrReadOnly]
     http_method_names = ['get', 'post', 'patch', 'delete']
+    filterset_class = TitleFilter
+    permission_classes = (IsAdminOrReadOnly,)
+
 
     def get_serializer_class(self):
         if self.request.method == 'GET':
@@ -248,10 +248,10 @@ class ReviewViewSet(ModelViewSet):
 class CommentViewSet(ModelViewSet):
     serializer_class = CommentSerializer
     permission_classes = (permissions.IsAuthenticatedOrReadOnly, IsAuthorOrModeratorOrAdmin)
-    http_method_names = ['get', 'post', 'patch', 'delete']
-
     def review_query(self):
         return get_object_or_404(Review, id=self.kwargs.get('review_id'))
+
+
 
     def get_queryset(self):
         review = get_object_or_404(
