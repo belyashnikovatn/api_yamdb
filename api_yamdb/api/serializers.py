@@ -2,7 +2,6 @@ from rest_framework import serializers
 
 from django.contrib.auth.tokens import default_token_generator as dtg
 from django.core.exceptions import ValidationError
-from django.db.models import Avg
 from django.shortcuts import get_object_or_404
 
 from api.validators import validate_data
@@ -82,13 +81,7 @@ class TitleReadOnlySerializer(serializers.ModelSerializer):
     """Класс-сериализатор для произведений: метод get."""
     genre = GenreSerializer(many=True, read_only=True)
     category = CategorySerializer(read_only=True)
-    rating = serializers.SerializerMethodField()
-
-    def get_rating(self, obj):
-        if obj.reviews.count() == 0:
-            return None
-        review_aggregate = (obj.reviews.aggregate(rating=Avg('score')))
-        return review_aggregate['rating']
+    rating = serializers.FloatField(read_only=True)
 
     class Meta:
         model = Title

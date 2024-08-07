@@ -14,6 +14,7 @@ from rest_framework_simplejwt.tokens import AccessToken
 from django.conf import settings
 from django.contrib.auth.tokens import default_token_generator as dtg
 from django.core.mail import send_mail
+from django.db.models import Avg
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 
@@ -188,7 +189,8 @@ class TitleViewSet(viewsets.ModelViewSet):
     Доступные действия: весь набор.
     Поиск по полям: название, год, slug жанры(ы), slug категория."""
     serializer_class = TitleSerializer
-    queryset = Title.objects.all()
+    queryset = Title.objects.annotate(
+        rating=Avg('reviews__score')).order_by('rating')
     filter_backends = (DjangoFilterBackend,)
     http_method_names = ['get', 'post', 'patch', 'delete']
     filterset_class = TitleFilter
