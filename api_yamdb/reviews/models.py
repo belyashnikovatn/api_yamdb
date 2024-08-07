@@ -52,7 +52,7 @@ class Title(models.Model):
     """Класс модели данных для произведений."""
 
     name = models.CharField('Название', max_length=MODELS_NAME_LENGTH)
-    year = models.PositiveIntegerField(
+    year = models.SmallIntegerField(
         'Год выпуска',
         validators=[
             MinValueValidator(
@@ -97,7 +97,6 @@ class GenreTitle(models.Model):
     class Meta:
         verbose_name = 'жанр произведения'
         verbose_name_plural = 'Жанры произведений'
-        ordering = ('id',)
         constraints = [
             models.UniqueConstraint(
                 fields=['title', 'genre'],
