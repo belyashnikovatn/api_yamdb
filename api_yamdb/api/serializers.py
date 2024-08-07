@@ -7,18 +7,15 @@ from django.shortcuts import get_object_or_404
 
 from api.validators import validate_data
 from reviews.models import Category, Comment, Genre, Review, Title
+from reviews.constants import (EMAIL_MAX_LENGTH, USERNAME_MAX_LENGTH)
 from users.models import User
 
 
 class SignUpSerializer(serializers.Serializer):
+    """Проверка уникальности email и username."""
 
-    """
-    Класс-сериализатор для регистрации пользователей.
-    Проверяет уникальность email и username.
-    """
-
-    email = serializers.EmailField(max_length=254)
-    username = serializers.CharField(max_length=150)
+    email = serializers.EmailField(max_length=EMAIL_MAX_LENGTH)
+    username = serializers.CharField(max_length=USERNAME_MAX_LENGTH)
 
     def validate(self, data):
         return validate_data(data)
