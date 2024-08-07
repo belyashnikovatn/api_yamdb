@@ -204,7 +204,8 @@ class ReviewViewSet(ModelViewSet):
     """Вьюсет для ревью."""
 
     serializer_class = ReviewSerializer
-    permission_classes = (IsAuthorOrModeratorOrAdmin,)
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly,
+                          IsAuthorOrModeratorOrAdmin,)
     http_method_names = ['get', 'post', 'patch', 'delete']
 
     def get_title(self):
