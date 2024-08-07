@@ -1,20 +1,17 @@
 from django.contrib.auth.models import AbstractUser
+from django.core.exceptions import ValidationError
 from django.core.validators import RegexValidator
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
+from reviews.constants import (USERNAME_REGEX,
+                               USERNAME_MAX_LENGTH,
+                               EMAIL_MAX_LENGTH,
+                               ROLE_NAME_MAX_LENGTH)
+
 
 class User(AbstractUser):
-    """Расширенная модель пользователя.
-    Переопрделяет и добавляет поля:
-    - роль (Enum: "user" "moderator" "admin"),
-    - юзернейм (<= 150 characters, вкл. буквы, цифры и символы: @, ., +, -),
-    - электронная почта (<= 254 characters),
-    - имя (<= 150 characters),
-    - фамилия (<= 150 characters),
-    - о себе,
-    - код подтверждения (для формирования токена).
-    """
+    """Расширенная модель юзера с дополнительными полями role и bio."""
 
     class Role(models.TextChoices):
         USER = 'user', _('User')
@@ -23,18 +20,17 @@ class User(AbstractUser):
 
     role = models.CharField(
         verbose_name='Роль',
-        max_length=100,
+        max_length=ROLE_NAME_MAX_LENGTH,
         choices=Role.choices,
         default=Role.USER,
     )
     username = models.CharField(
         verbose_name='Никнейм',
-        blank=False,
         null=False,
         unique=True,
-        max_length=150,
+        max_length=USERNAME_MAX_LENGTH,
         validators=[RegexValidator(
-            regex=r'^[\w.@+-]+$',
+            regex=USERNAME_REGEX,
             message='Unacceptable symbol'
         )]
     )
@@ -42,23 +38,14 @@ class User(AbstractUser):
                               blank=False,
                               null=False,
                               unique=True,
-                              max_length=254)
-    first_name = models.CharField(verbose_name='Имя',
-                                  max_length=150,
-                                  blank=True)
-    last_name = models.CharField(verbose_name='Фамилия',
-                                 max_length=150,
-                                 blank=True)
+                              max_length=EMAIL_MAX_LENGTH)
     bio = models.TextField(verbose_name='О себе',
                            blank=True)
-    confirmation_code = models.CharField(
-        verbose_name='Код подтверждения',
-        max_length=100)
 
     class Meta:
         verbose_name = 'пользователь'
         verbose_name_plural = 'Пользователи'
-        ordering = ('id',)
+        ordering = ['-date_joined']
 
     def __str__(self):
         return self.username
@@ -70,3 +57,13 @@ class User(AbstractUser):
     @property
     def is_admin(self):
         return self.role == self.Role.ADMIN or self.is_superuser
+
+    def clean(self):
+        """Проверка, что username не равен 'me' (тольк. нижний регистр)."""
+        if self.username == 'me':
+            raise ValidationError('Username "me" is not allowed.')
+
+    def save(self, *args, **kwargs):
+        """Переопределяем метод save, чтобы вызвать метод clean."""
+        self.clean()
+        super(User, self).save(*args, **kwargs)
