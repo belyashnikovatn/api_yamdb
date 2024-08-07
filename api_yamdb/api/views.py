@@ -1,7 +1,6 @@
 from rest_framework import (filters, generics, mixins, permissions, status,
                             viewsets)
 from rest_framework.decorators import action
-from rest_framework.exceptions import ValidationError
 from rest_framework.filters import SearchFilter
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
@@ -78,35 +77,35 @@ class SignUpView(generics.CreateAPIView):
 
 class TokenView(generics.CreateAPIView):
     """
-    Вью для получения JWT-токена.
+    Вью для создания JWT-токена из username и confirmation_code.
 
     Этот класс обрабатывает только POST-запросы которые
     приходят на эндпоинт /api/v1/auth/token/.
-
-    Данный вью-класс использует сериализатор TokenSerializer для
-    валидации значений, переданных пользователем.
-
-    Принимает параметры username и confirmation_code от юзера,
-    и возвращает JWT access-токен.
-
     Для обновления access-токена не применяем refresh-токен и доп. эндпоинт.
-    Токен обновляется через повторную передачу username и кода подтверждения.
+    Токен обновляется через повторную передачу username и confirmation_code.
+    Если проверка confirmation_code не проходит,
+    сериализатор выбрасывает исключение, и выполнение
+    метода create не продолжается.
+
+    Аргументы
+    ---------
+    serializer_class : Класс для валидации и десериализации входящих данных.
+    permission_classes : Класс доступов к эндпоинту данного вью.
+
+    Методы
+    ------
+    create(request) : Обработка запроса на создание пользователя.
     """
+
     serializer_class = TokenSerializer
     permission_classes = (permissions.AllowAny,)
 
     def create(self, request, *args, **kwargs):
-        """
-        Создает JWT-токен на основе username и confirmation_code.
-        """
+        """Возвращает JWT-токен на основе username и confirmation_code."""
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         username = serializer.validated_data['username']
         user = get_object_or_404(User, username=username)
-        # Проверяем код подтверждения
-        if not dtg.check_token(user, request.data.get('confirmation_code')):
-            raise ValidationError('Неверный код подтверждения')
-
         # Создаем JWT-токен для пользователя
         access_token = AccessToken.for_user(user)
 
