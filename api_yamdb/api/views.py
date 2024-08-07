@@ -117,17 +117,26 @@ class UserViewSet(viewsets.ModelViewSet):
     """
     Вьюсет для управления CRUD операциями Пользователей.
 
-    GET /api/v1/users/: Получение списка юзеров
-    с возможностью поиска по username.
-    POST /api/v1/users/: Создание нового юзера.
-    GET /api/v1/users/{username}/: Получение данных юзера по username.
-    PATCH /api/v1/users/{username}/: Обновление данных юзера по username.
-    DELETE /api/v1/users/{username}/: Удаление юзера.
-
-    Кастомные методы:
+    Подключает два метода для выделенного эндпоинта /me/.
     GET /api/v1/users/me/: Получение данных текущего юзера.
     PATCH /api/v1/users/me/: Обновление данных текущего юзера.
+
+    Аргументы
+    ---------
+    queryset : Выборка всех пользователей.
+    serializer_class : Сериализатор для преобразования данных юзера.
+    pagination_class : Пагинация результатов запроса.
+    permission_classes : Разрешения, применимые ко всему вьюсету.
+    filter_backends : Фильтр, используемый для поиска по username.
+    search_fields : Поля, по которым будет происходить поиск.
+    lookup_field : Поле, используемое для поиска юзера вместо pk.
+    http_method_names : Разрешенные методы HTTP-запросов.
+
+    Методы
+    ------
+    me(request) : Обработка GET/PATCH-запросов для авториз. юзера.
     """
+
     queryset = User.objects.all()
     serializer_class = UserSerializer
     pagination_class = PageNumberPagination
@@ -140,26 +149,21 @@ class UserViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['get', 'patch'], url_path='me',
             permission_classes=(permissions.IsAuthenticated,))
     def me(self, request):
-        """
-        Обрабатывает GET и PATCH запросы для
-        текущего аутентифицированного пользователя.
-        """
+        """Обрабатывает GET и PATCH запросы только в /me/."""
         if request.method == 'GET':
             # Создаем экземпляр сериализатора с данными из POST-запроса:
             serializer = self.get_serializer(request.user)
             return Response(serializer.data)
 
-        elif request.method == 'PATCH':
+        else:
             # Создаем экземпляр сериализатора с данными из POST-запроса.
-            # partial=True -- поскольку у нас PATCH-запрос, ставим флаг
-            # что мы обновляем не все поля, как в PUT-запросе, а выборочные.
+            # partial=True -- поскольку у нас PATCH-запрос, а не PUT.
             serializer = self.get_serializer(request.user,
                                              data=request.data,
                                              partial=True)
-            if serializer.is_valid():
-                serializer.save(role=request.user.role)
-                return Response(serializer.data)
-            return Response(serializer.errors, status=400)
+            serializer.is_valid(raise_exception=True)
+            serializer.save(role=request.user.role)
+            return Response(serializer.data)
 
 
 class NameSlugModelViewSet(mixins.CreateModelMixin,
