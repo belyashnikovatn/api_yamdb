@@ -18,7 +18,10 @@ from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 
 from api.filters import TitleFilter
-from api.permissions import IsAdminOrSuperuser, IsAuthorOrModeratorOrAdmin, IsAdminOrReadOnly
+from api.permissions import (
+    IsAdminOrSuperuser,
+    IsAuthorOrModeratorOrAdmin,
+    IsAdminOrReadOnly)
 from api.serializers import (CategorySerializer, CommentSerializer,
                              GenreSerializer, ReviewSerializer,
                              SignUpSerializer, TitleReadOnlySerializer,
@@ -219,7 +222,10 @@ class ReviewViewSet(ModelViewSet):
 
 class CommentViewSet(ModelViewSet):
     serializer_class = CommentSerializer
-    permission_classes = (permissions.IsAuthenticatedOrReadOnly, IsAuthorOrModeratorOrAdmin)
+    permission_classes = (
+        permissions.IsAuthenticatedOrReadOnly,
+        IsAuthorOrModeratorOrAdmin
+    )
     http_method_names = ['get', 'post', 'patch', 'delete']
 
     def review_query(self):
