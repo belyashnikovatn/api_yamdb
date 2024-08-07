@@ -6,8 +6,8 @@ from django.core.validators import (MaxValueValidator, MinValueValidator,
 from django.db import models
 
 from reviews.constants import (
-    MINYEAR,
-    SLICELENGTH,
+    MIN_YEAR,
+    SLICE_LENGTH,
     MIN_SCORE_VALUE,
     MAX_SCORE_VALUE
 )
@@ -34,7 +34,7 @@ class NameSlugModel(models.Model):
         ordering = ('name',)
 
     def __str__(self):
-        return self.name[:SLICELENGTH]
+        return self.name[:SLICE_LENGTH]
 
 
 class Genre(NameSlugModel):
@@ -60,7 +60,7 @@ class Title(models.Model):
         'Год выпуска',
         validators=[
             MinValueValidator(
-                MINYEAR,
+                MIN_YEAR,
                 message='This is not possible!'),
             MaxValueValidator(
                 int(datetime.now().year),
@@ -89,7 +89,7 @@ class Title(models.Model):
         ordering = ('name', '-year')
 
     def __str__(self):
-        return f'{self.name[:SLICELENGTH]}, {self.year}'
+        return f'{self.name[:SLICE_LENGTH]}, {self.year}'
 
 
 class GenreTitle(models.Model):
@@ -109,7 +109,7 @@ class GenreTitle(models.Model):
         ]
 
     def __str__(self):
-        return f'{self.genre} у {self.title[:SLICELENGTH]}'
+        return f'{self.genre} у {self.title[:SLICE_LENGTH]}'
 
 
 class AuthorTextPubDateBaseModel(models.Model):
@@ -132,7 +132,7 @@ class AuthorTextPubDateBaseModel(models.Model):
         ordering = ('-pub_date',)
 
     def __str__(self):
-        return self.text[:SLICELENGTH]
+        return self.text[:SLICE_LENGTH]
 
 
 class Review(AuthorTextPubDateBaseModel):
