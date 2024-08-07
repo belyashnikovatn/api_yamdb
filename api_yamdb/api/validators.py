@@ -1,7 +1,7 @@
 import re
 
-from django.db.models import Q
 from rest_framework import serializers
+from django.db.models import Q
 
 from users.models import User
 
