@@ -2,7 +2,6 @@ from rest_framework import serializers
 
 from django.contrib.auth.tokens import default_token_generator as dtg
 from django.core.exceptions import ValidationError
-from django.db.models import Avg
 from django.shortcuts import get_object_or_404
 
 from api.validators import validate_data
@@ -99,13 +98,7 @@ class TitleReadOnlySerializer(serializers.ModelSerializer):
 
     genre = GenreSerializer(many=True, read_only=True)
     category = CategorySerializer(read_only=True)
-    rating = serializers.SerializerMethodField()
-
-    def get_rating(self, obj):
-        if obj.reviews.count() == 0:
-            return None
-        review_aggregate = (obj.reviews.aggregate(rating=Avg('score')))
-        return review_aggregate['rating']
+    rating = serializers.FloatField(read_only=True)
 
     class Meta:
         model = Title
@@ -119,7 +112,9 @@ class TitleSerializer(serializers.ModelSerializer):
     genre = serializers.SlugRelatedField(
         slug_field='slug',
         queryset=Genre.objects.all(),
-        many=True
+        many=True,
+        required=True,
+        allow_null=True
     )
     category = serializers.SlugRelatedField(
         slug_field='slug',
@@ -129,6 +124,15 @@ class TitleSerializer(serializers.ModelSerializer):
     class Meta:
         model = Title
         fields = ('id', 'name', 'year', 'description', 'genre', 'category')
+
+    def to_representation(self, value):
+        representation = super().to_representation(value)
+        title_genres = Genre.objects.filter(slug__in=representation['genre'])
+        representation['genre'] = title_genres.values('name', 'slug')
+        category = get_object_or_404(Category, slug=representation['category'])
+        title_category = {'name': category.name, 'slug': category.slug}
+        representation['category'] = title_category
+        return representation
 
 
 class ReviewSerializer(serializers.ModelSerializer):
