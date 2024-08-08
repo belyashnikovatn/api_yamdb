@@ -6,15 +6,20 @@ from reviews.models import Title
 class TitleFilter(django_filters.FilterSet):
     """
     Фильтрация по полям модели Title.
-    Во вью необходимо вместо
-    filterset_fields использовать filterset_class.
+
+    Этот фильтр позволяет фильтровать объекты модели Title
+    по следующим полям: name, year, genre и category.
+
+    Атрибуты
+    --------
+        name : Фильтр по названию, ищет подстроку в поле name.
+        genre : Фильтр по жанру, ищет по slug жанра.
+        category : Фильтр по категории, ищет по slug категории.
     """
+
     name = django_filters.CharFilter(
         field_name='name',
         lookup_expr='icontains'
-    )
-    year = django_filters.NumberFilter(
-        field_name='year',
     )
     genre = django_filters.CharFilter(
         field_name='genre__slug',
@@ -24,5 +29,14 @@ class TitleFilter(django_filters.FilterSet):
     )
 
     class Meta:
+        """
+        Метакласс для настройки фильтрации.
+
+        Атрибуты
+        --------
+            model : Модель, для которой применяется фильтр (Title).
+            fields : Поля, по которым будет происходить фильтрация.
+        """
+
         model = Title
         fields = ('name', 'year', 'category', 'genre')
