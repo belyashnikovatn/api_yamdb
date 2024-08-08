@@ -152,7 +152,7 @@ class ReviewSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Review
-        fields = '__all__'
+        fields = ['title', 'id', 'text', 'author', 'score', 'pub_date']
 
     def validate_score(self, value):
         if not (MIN_SERIALIZER_SCORE <= value <= MAX_SERIALIZER_SCORE):
