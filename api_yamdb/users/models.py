@@ -4,10 +4,11 @@ from django.core.validators import RegexValidator
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
-from reviews.constants import (USERNAME_REGEX,
+from reviews.constants import (EMAIL_MAX_LENGTH,
+                               FORBIDDEN_USERNAME,
+                               ROLE_NAME_MAX_LENGTH,
                                USERNAME_MAX_LENGTH,
-                               EMAIL_MAX_LENGTH,
-                               ROLE_NAME_MAX_LENGTH)
+                               USERNAME_REGEX)
 
 
 class User(AbstractUser):
@@ -26,7 +27,6 @@ class User(AbstractUser):
     )
     username = models.CharField(
         verbose_name='Никнейм',
-        null=False,
         unique=True,
         max_length=USERNAME_MAX_LENGTH,
         validators=[RegexValidator(
@@ -35,8 +35,6 @@ class User(AbstractUser):
         )]
     )
     email = models.EmailField(verbose_name='Почта',
-                              blank=False,
-                              null=False,
                               unique=True,
                               max_length=EMAIL_MAX_LENGTH)
     bio = models.TextField(verbose_name='О себе',
@@ -50,6 +48,17 @@ class User(AbstractUser):
     def __str__(self):
         return self.username
 
+    def save(self, *args, **kwargs):
+        """Переопределяем метод save, чтобы вызвать метод clean."""
+        self.clean()
+        super().save(*args, **kwargs)
+
+    def clean(self):
+        """Проверка, что username - не зарезеривированное слово"""
+        if self.username == FORBIDDEN_USERNAME:
+            raise ValidationError(
+                f'Username {FORBIDDEN_USERNAME} is not allowed.')
+
     @property
     def is_moderator(self):
         return self.role == self.Role.MODERATOR
@@ -57,13 +66,3 @@ class User(AbstractUser):
     @property
     def is_admin(self):
         return self.role == self.Role.ADMIN or self.is_superuser
-
-    def clean(self):
-        """Проверка, что username не равен 'me' (тольк. нижний регистр)."""
-        if self.username == 'me':
-            raise ValidationError('Username "me" is not allowed.')
-
-    def save(self, *args, **kwargs):
-        """Переопределяем метод save, чтобы вызвать метод clean."""
-        self.clean()
-        super(User, self).save(*args, **kwargs)

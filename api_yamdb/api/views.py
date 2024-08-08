@@ -1,3 +1,9 @@
+from django.conf import settings
+from django.contrib.auth.tokens import default_token_generator as dtg
+from django.core.mail import send_mail
+from django.db.models import Avg
+from django.shortcuts import get_object_or_404
+from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import (filters, generics, mixins, permissions, status,
                             viewsets)
 from rest_framework.decorators import action
@@ -6,12 +12,6 @@ from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 from rest_framework_simplejwt.tokens import AccessToken
-from django.conf import settings
-from django.contrib.auth.tokens import default_token_generator as dtg
-from django.core.mail import send_mail
-from django.db.models import Avg
-from django.shortcuts import get_object_or_404
-from django_filters.rest_framework import DjangoFilterBackend
 
 from api.filters import TitleFilter
 from api.permissions import (
@@ -155,16 +155,14 @@ class UserViewSet(viewsets.ModelViewSet):
             # Создаем экземпляр сериализатора с данными из POST-запроса:
             serializer = self.get_serializer(request.user)
             return Response(serializer.data)
-
-        else:
-            # Создаем экземпляр сериализатора с данными из POST-запроса.
-            # partial=True -- поскольку у нас PATCH-запрос, а не PUT.
-            serializer = self.get_serializer(request.user,
-                                             data=request.data,
-                                             partial=True)
-            serializer.is_valid(raise_exception=True)
-            serializer.save(role=request.user.role)
-            return Response(serializer.data)
+        # Создаем экземпляр сериализатора с данными из POST-запроса.
+        # # partial=True -- поскольку у нас PATCH-запрос, а не PUT.
+        serializer = self.get_serializer(request.user,
+                                         data=request.data,
+                                         partial=True)
+        serializer.is_valid(raise_exception=True)
+        serializer.save(role=request.user.role)
+        return Response(serializer.data)
 
 
 class NameSlugModelViewSet(mixins.CreateModelMixin,
@@ -254,8 +252,7 @@ class CommentViewSet(ModelViewSet):
         )
 
     def get_queryset(self):
-        review = self.review_query()
-        return review.comments.all()
+        return self.review_query().comments.all()
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user, review=self.review_query())

@@ -101,7 +101,7 @@ class TitleReadOnlySerializer(serializers.ModelSerializer):
 
     genre = GenreSerializer(many=True, read_only=True)
     category = CategorySerializer(read_only=True)
-    rating = serializers.FloatField(read_only=True)
+    rating = serializers.IntegerField(read_only=True, default=0)
 
     class Meta:
         model = Title
@@ -117,7 +117,8 @@ class TitleSerializer(serializers.ModelSerializer):
         queryset=Genre.objects.all(),
         many=True,
         required=True,
-        allow_null=True
+        allow_null=False,
+        allow_empty=False
     )
     category = serializers.SlugRelatedField(
         slug_field='slug',
@@ -128,23 +129,13 @@ class TitleSerializer(serializers.ModelSerializer):
         model = Title
         fields = ('id', 'name', 'year', 'description', 'genre', 'category')
 
-    def to_representation(self, value):
-        representation = super().to_representation(value)
-        title_genres = Genre.objects.filter(slug__in=representation['genre'])
-        representation['genre'] = title_genres.values('name', 'slug')
-        category = get_object_or_404(Category, slug=representation['category'])
-        title_category = {'name': category.name, 'slug': category.slug}
-        representation['category'] = title_category
-        return representation
+    def to_representation(self, instance):
+        return TitleReadOnlySerializer(instance).data
 
 
 class ReviewSerializer(serializers.ModelSerializer):
     """Класс-сериализатор для ревью."""
 
-    title = serializers.SlugRelatedField(
-        slug_field='name',
-        read_only=True
-    )
     author = serializers.SlugRelatedField(
         slug_field='username',
         read_only=True
@@ -152,14 +143,13 @@ class ReviewSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Review
-        fields = ['title', 'id', 'text', 'author', 'score', 'pub_date']
+        fields = ['id', 'text', 'author', 'score', 'pub_date']
 
     def validate_score(self, value):
         if not (MIN_SERIALIZER_SCORE <= value <= MAX_SERIALIZER_SCORE):
             raise serializers.ValidationError(
-                f'Оценка должна быть в диапазоне от '
-                f'{MIN_SERIALIZER_SCORE} до '
-                f'{MAX_SERIALIZER_SCORE}!'
+                f'Оценка должна быть в диапазоне от {MIN_SERIALIZER_SCORE}'
+                f'до {MAX_SERIALIZER_SCORE}!'
             )
         return value
 
@@ -185,11 +175,11 @@ class CommentSerializer(serializers.ModelSerializer):
         read_only=True,
         default=serializers.CurrentUserDefault()
     )
-    review = serializers.SlugRelatedField(
-        slug_field='text',
+
+    pub_date = serializers.DateTimeField(
         read_only=True
     )
 
     class Meta:
         model = Comment
-        fields = ('id', 'text', 'author', 'pub_date', 'review')
+        fields = ('id', 'text', 'author', 'pub_date')

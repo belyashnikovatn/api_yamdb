@@ -1,13 +1,10 @@
-from datetime import datetime
-
 from django.contrib.auth import get_user_model
-from django.core.exceptions import ValidationError
 from django.core.validators import (MaxValueValidator, MinValueValidator)
 from django.db import models
 
+from api.validators import real_year
 from reviews.constants import (
     MAX_SCORE_VALUE,
-    MIN_YEAR,
     MIN_SCORE_VALUE,
     MODELS_NAME_LENGTH,
     SLICE_LENGTH
@@ -47,13 +44,6 @@ class Category(NameSlugModel):
     class Meta(NameSlugModel.Meta):
         verbose_name = 'категория'
         verbose_name_plural = 'Категории'
-
-
-def real_year(value):
-    if int(datetime.now().year) <= value < MIN_YEAR:
-        raise ValidationError(
-            'Укажите верный год.'
-        )
 
 
 class Title(models.Model):
