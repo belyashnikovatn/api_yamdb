@@ -136,10 +136,6 @@ class TitleSerializer(serializers.ModelSerializer):
 class ReviewSerializer(serializers.ModelSerializer):
     """Класс-сериализатор для ревью."""
 
-    title = serializers.SlugRelatedField(
-        slug_field='name',
-        read_only=True
-    )
     author = serializers.SlugRelatedField(
         slug_field='username',
         read_only=True
@@ -147,14 +143,13 @@ class ReviewSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Review
-        fields = ['title', 'id', 'text', 'author', 'score', 'pub_date']
+        fields = ['id', 'text', 'author', 'score', 'pub_date']
 
     def validate_score(self, value):
         if not (MIN_SERIALIZER_SCORE <= value <= MAX_SERIALIZER_SCORE):
             raise serializers.ValidationError(
-                f'Оценка должна быть в диапазоне от '
-                f'{MIN_SERIALIZER_SCORE} до '
-                f'{MAX_SERIALIZER_SCORE}!'
+                f'Оценка должна быть в диапазоне от {MIN_SERIALIZER_SCORE}'
+                f'до {MAX_SERIALIZER_SCORE}!'
             )
         return value
 
