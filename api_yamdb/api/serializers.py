@@ -176,6 +176,10 @@ class CommentSerializer(serializers.ModelSerializer):
         default=serializers.CurrentUserDefault()
     )
 
+    pub_date = serializers.DateTimeField(
+        read_only=True
+    )
+
     class Meta:
         model = Comment
         fields = ('id', 'text', 'author', 'pub_date')
