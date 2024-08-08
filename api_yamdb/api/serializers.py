@@ -2,13 +2,11 @@ from rest_framework import serializers
 
 from django.contrib.auth.tokens import default_token_generator as dtg
 from django.core.exceptions import ValidationError
+from django.db.models import Avg
 from django.shortcuts import get_object_or_404
 
 from api.validators import validate_data
 from reviews.models import Category, Comment, Genre, Review, Title
-from reviews.constants import (EMAIL_MAX_LENGTH,
-                               USERNAME_MAX_LENGTH,
-                               CONFIRMATION_CODE_MAX_LENGTH)
 from users.models import User
 from reviews.constants import (
     MAX_SERIALIZER_SCORE, MIN_SERIALIZER_SCORE
@@ -16,10 +14,14 @@ from reviews.constants import (
 
 
 class SignUpSerializer(serializers.Serializer):
-    """Проверка уникальности email и username."""
 
-    email = serializers.EmailField(max_length=EMAIL_MAX_LENGTH)
-    username = serializers.CharField(max_length=USERNAME_MAX_LENGTH)
+    """
+    Класс-сериализатор для регистрации пользователей.
+    Проверяет уникальность email и username.
+    """
+
+    email = serializers.EmailField(max_length=254)
+    username = serializers.CharField(max_length=150)
 
     def validate(self, data):
         return validate_data(data)
@@ -28,41 +30,20 @@ class SignUpSerializer(serializers.Serializer):
 class TokenSerializer(serializers.Serializer):
     """
     Класс-сериализатор для получения токена JWT.
-
     Проверяет корректность username и кода подтверждения.
-    Наследуем от класса Serializer, а не ModelSerializer, так как:
-    1. не требуется создавать или обновлять объекты модели.
-    2. требуется только проводить валидацию переданных значений.
 
-    Атрибуты
-    --------
-    username : Имя зарегестрированного пользователя, который получает токен.
-    confirmation_code : Код, полученный пользователем на email.
-
-    Методы
-    ------
-    validate(data (dict)) : Проверка корректности username и confirmation_code.
+    Наследуем от сериализатора класса Serializer, а не модели, так как:
+    - не требуется создавать или обновлять объекты модели.
+    - требуется только проводить валидацию переданных значений.
     """
-
-    username = serializers.CharField(max_length=USERNAME_MAX_LENGTH)
-    confirmation_code = serializers.CharField(
-        max_length=CONFIRMATION_CODE_MAX_LENGTH)
+    username = serializers.CharField(max_length=150)
+    confirmation_code = serializers.CharField(max_length=100)
 
     class Meta:
-        """
-        Метакласс для настройки сериализатора.
-
-        Атрибуты
-        --------
-        model : Модель, для которой применяется сериализатор (User).
-        fields : Поля, по которым будет происходить сериализация.
-        """
-
         model = User
         fields = ('username', 'confirmation_code')
 
     def validate(self, data):
-        """Валидирует data и возращает провалидированный словарь data."""
         username = data.get('username')
         confirmation_code = data.get('confirmation_code')
         user = get_object_or_404(User, username=username)
@@ -72,8 +53,12 @@ class TokenSerializer(serializers.Serializer):
 
 
 class UserSerializer(serializers.ModelSerializer):
-    """Сериализатор для переопределенной модели Пользователя."""
+    """
+    Класс-сериализатор для переопределенной модели пользователя.
 
+    Применяются валидации и ограничения, указанные в модели User.
+    Дополнительные специфические валидации не треубуются.
+    """
     class Meta:
         model = User
         fields = ['username', 'email', 'first_name',
@@ -98,10 +83,15 @@ class CategorySerializer(serializers.ModelSerializer):
 
 class TitleReadOnlySerializer(serializers.ModelSerializer):
     """Класс-сериализатор для произведений: метод get."""
-
     genre = GenreSerializer(many=True, read_only=True)
     category = CategorySerializer(read_only=True)
-    rating = serializers.FloatField(read_only=True)
+    rating = serializers.SerializerMethodField()
+
+    def get_rating(self, obj):
+        if obj.reviews.count() == 0:
+            return None
+        review_aggregate = (obj.reviews.aggregate(rating=Avg('score')))
+        return review_aggregate['rating']
 
     class Meta:
         model = Title
@@ -111,13 +101,10 @@ class TitleReadOnlySerializer(serializers.ModelSerializer):
 
 class TitleSerializer(serializers.ModelSerializer):
     """Класс-сериализатор для произведений: методы кроме get."""
-
     genre = serializers.SlugRelatedField(
         slug_field='slug',
         queryset=Genre.objects.all(),
-        many=True,
-        required=True,
-        allow_null=True
+        many=True
     )
     category = serializers.SlugRelatedField(
         slug_field='slug',
@@ -128,14 +115,6 @@ class TitleSerializer(serializers.ModelSerializer):
         model = Title
         fields = ('id', 'name', 'year', 'description', 'genre', 'category')
 
-    def to_representation(self, value):
-        representation = super().to_representation(value)
-        title_genres = Genre.objects.filter(slug__in=representation['genre'])
-        representation['genre'] = title_genres.values('name', 'slug')
-        category = get_object_or_404(Category, slug=representation['category'])
-        title_category = {'name': category.name, 'slug': category.slug}
-        representation['category'] = title_category
-        return representation
 
 
 class ReviewSerializer(serializers.ModelSerializer):
@@ -162,19 +141,20 @@ class ReviewSerializer(serializers.ModelSerializer):
                 f'{MAX_SERIALIZER_SCORE}!'
             )
         return value
-
+    
     def validate(self, data):
         request = self.context['request']
-
+    
         if request.method == 'POST':
             author = request.user
             title_id = self.context.get('view').kwargs.get('title_id')
             title = get_object_or_404(Title, pk=title_id)
-
+        
             if Review.objects.filter(title=title, author=author).exists():
                 raise ValidationError('Может существовать только один отзыв!')
-
+    
         return data
+
 
 
 class CommentSerializer(serializers.ModelSerializer):
@@ -192,4 +172,4 @@ class CommentSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Comment
-        fields = '__all__'
+        fields = ('id', 'text', 'author', 'pub_date', 'review')
