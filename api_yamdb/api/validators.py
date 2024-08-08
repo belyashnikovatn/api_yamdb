@@ -1,9 +1,15 @@
+from datetime import datetime
 import re
 
 from django.db.models import Q
+from django.core.exceptions import ValidationError
 from rest_framework import serializers
 
-from reviews.constants import FORBIDDEN_USERNAME, USERNAME_REGEX
+from reviews.constants import (
+    FORBIDDEN_USERNAME,
+    MIN_YEAR,
+    USERNAME_REGEX,
+)
 from users.models import User
 
 
@@ -30,3 +36,10 @@ def validate_data(data):
             raise serializers.ValidationError('This username is taken')
 
     return data
+
+
+def real_year(value):
+    if int(datetime.now().year) <= value < MIN_YEAR:
+        raise ValidationError(
+            'Укажите верный год.'
+        )
