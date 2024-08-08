@@ -129,14 +129,8 @@ class TitleSerializer(serializers.ModelSerializer):
         model = Title
         fields = ('id', 'name', 'year', 'description', 'genre', 'category')
 
-    def to_representation(self, value):
-        representation = super().to_representation(value)
-        title_genres = Genre.objects.filter(slug__in=representation['genre'])
-        representation['genre'] = title_genres.values('name', 'slug')
-        category = get_object_or_404(Category, slug=representation['category'])
-        title_category = {'name': category.name, 'slug': category.slug}
-        representation['category'] = title_category
-        return representation
+    def to_representation(self, instance):
+        return TitleReadOnlySerializer(instance).data
 
 
 class ReviewSerializer(serializers.ModelSerializer):
