@@ -252,8 +252,7 @@ class CommentViewSet(ModelViewSet):
         )
 
     def get_queryset(self):
-        review = self.review_query()
-        return review.comments.all()
+        return self.review_query().comments.all()
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user, review=self.review_query())
