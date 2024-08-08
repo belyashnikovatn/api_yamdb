@@ -35,7 +35,7 @@ class TitleAdmin(DisplayModelAdmin):
 
     def genres(self, obj):
         title_genres = obj.genres.all()
-        return ' , '.join(str(x.name) for x in title_genres)
+        return ' , '.join(x.name for x in title_genres)
 
 
 @admin.register(Review)
