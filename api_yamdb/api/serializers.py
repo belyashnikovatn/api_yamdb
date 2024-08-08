@@ -138,7 +138,6 @@ class TitleSerializer(serializers.ModelSerializer):
         return representation
 
 
-
 class ReviewSerializer(serializers.ModelSerializer):
     """Класс-сериализатор для ревью."""
 
@@ -163,20 +162,19 @@ class ReviewSerializer(serializers.ModelSerializer):
                 f'{MAX_SERIALIZER_SCORE}!'
             )
         return value
-    
+
     def validate(self, data):
         request = self.context['request']
-    
+
         if request.method == 'POST':
             author = request.user
             title_id = self.context.get('view').kwargs.get('title_id')
             title = get_object_or_404(Title, pk=title_id)
-        
+
             if Review.objects.filter(title=title, author=author).exists():
                 raise ValidationError('Может существовать только один отзыв!')
-    
-        return data
 
+        return data
 
 
 class CommentSerializer(serializers.ModelSerializer):
