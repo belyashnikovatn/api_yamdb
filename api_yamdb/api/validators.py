@@ -3,7 +3,7 @@ import re
 from django.db.models import Q
 from rest_framework import serializers
 
-from reviews.constants import USERNAME_REGEX, FORBIDDEN_USERNAME
+from reviews.constants import FORBIDDEN_USERNAME, USERNAME_REGEX
 from users.models import User
 
 
