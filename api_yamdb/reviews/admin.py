@@ -31,10 +31,11 @@ class TitleAdmin(DisplayModelAdmin):
     list_editable = (
         'category',
     )
-    list_display = ('name', 'genres')
+    list_display = ('name', 'genres', 'category', 'year', 'description')
 
     def genres(self, obj):
-        return obj.genres.all()
+        title_genres = obj.genres.all()
+        return ' , '.join(str(x.name) for x in title_genres)
 
 
 @admin.register(Review)
