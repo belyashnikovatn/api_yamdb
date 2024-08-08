@@ -9,19 +9,19 @@ from api.views import (CategoryViewSet, CommentViewSet, GenreViewSet,
 API_VERSION_1 = 'v1/'
 
 router_v1 = routers.DefaultRouter()
-router_v1.register('users', UserViewSet)
-router_v1.register('genres', GenreViewSet)
-router_v1.register('categories', CategoryViewSet)
-router_v1.register('titles', TitleViewSet)
+router_v1.register('users', UserViewSet, basename='users')
+router_v1.register('genres', GenreViewSet, basename='genres')
+router_v1.register('categories', CategoryViewSet, basename='categories')
+router_v1.register('titles', TitleViewSet, basename='titles')
 router_v1.register(
     r'titles/(?P<title_id>[\d]+)/reviews',
     ReviewViewSet,
-    basename='review'
+    basename='reviews'
 )
 router_v1.register(
     r'titles/(?P<title_id>[\d]+)/reviews/(?P<review_id>[\d]+)/comments',
     CommentViewSet,
-    basename='comment'
+    basename='comments'
 )
 
 auth_patterns = [
