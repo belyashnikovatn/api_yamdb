@@ -155,16 +155,14 @@ class UserViewSet(viewsets.ModelViewSet):
             # Создаем экземпляр сериализатора с данными из POST-запроса:
             serializer = self.get_serializer(request.user)
             return Response(serializer.data)
-
-        else:
-            # Создаем экземпляр сериализатора с данными из POST-запроса.
-            # partial=True -- поскольку у нас PATCH-запрос, а не PUT.
-            serializer = self.get_serializer(request.user,
-                                             data=request.data,
-                                             partial=True)
-            serializer.is_valid(raise_exception=True)
-            serializer.save(role=request.user.role)
-            return Response(serializer.data)
+        # Создаем экземпляр сериализатора с данными из POST-запроса.
+        # # partial=True -- поскольку у нас PATCH-запрос, а не PUT.
+        serializer = self.get_serializer(request.user,
+                                         data=request.data,
+                                         partial=True)
+        serializer.is_valid(raise_exception=True)
+        serializer.save(role=request.user.role)
+        return Response(serializer.data)
 
 
 class NameSlugModelViewSet(mixins.CreateModelMixin,
